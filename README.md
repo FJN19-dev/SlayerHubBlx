@@ -26,71 +26,38 @@ local Tab = Window:AddTab({ Title = "Teleporte", Icon = "🏙️" })
     Icon = String
 ]]
 
--- Script: Botão para viajar ao Sea 2
-local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
+-- Criação da GUI
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Button = Instance.new("TextButton")
 
--- Função para mover até o NPC
-local function moveTo(position)
-    local humanoid = char:WaitForChild("Humanoid")
-    humanoid:MoveTo(position)
-    humanoid.MoveToFinished:Wait()
-end
+-- Configurações da GUI
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "CustomInterface"
 
--- Função para interagir com o NPC
-local function interactWithNPC(npc)
-    fireclickdetector(npc:FindFirstChild("ClickDetector"))
-end
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
 
--- Função principal para ir ao Sea 2
-local function goToSea2()
-    local levelRequired = 700 -- Nível necessário para ir ao Sea 2
-    if player.Data.Level.Value < levelRequired then
-        warn("Você precisa estar no nível " .. levelRequired .. " para ir ao Segundo Mar.")
-        return
+Button.Parent = Frame
+Button.Text = "Ir para o Segundo Mar"
+Button.Size = UDim2.new(0, 180, 0, 50)
+Button.Position = UDim2.new(0, 10, 0, 25)
+Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Font = Enum.Font.SourceSans
+Button.TextSize = 20
+
+-- Ação do botão
+Button.MouseButton1Click:Connect(function()
+    -- Código para teletransportar o jogador para o segundo mar
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    
+    if character then
+        local secondSeaPosition = Vector3.new(0, 100, 0) -- Altere para as coordenadas do Segundo Mar
+        character:SetPrimaryPartCFrame(CFrame.new(secondSeaPosition))
+        print("Você foi teletransportado para o Segundo Mar!")
     end
-
-    -- Localização do NPC que transporta para o Segundo Mar
-    local sea2NPC = nil
-    for _, npc in pairs(workspace:GetDescendants()) do
-        if npc:IsA("Model") and npc:FindFirstChild("NameTag") and npc.NameTag.Text == "Sea 2 NPC" then
-            sea2NPC = npc
-            break
-        end
-    end
-
-    if not sea2NPC then
-        warn("NPC para o Segundo Mar não encontrado.")
-        return
-    end
-
-    -- Mover até o NPC e interagir
-    moveTo(sea2NPC.PrimaryPart.Position)
-    interactWithNPC(sea2NPC)
-
-    -- Confirmar a viagem
-    wait(2)
-    local gui = player.PlayerGui:FindFirstChild("Sea2ConfirmationGUI")
-    if gui then
-        gui.ConfirmButton.MouseButton1Click:Fire()
-        print("Viajando para o Segundo Mar...")
-    else
-        warn("Não foi possível encontrar o botão de confirmação.")
-    end
-end
-
--- Criar botão na tela
-local screenGui = Instance.new("ScreenGui", player.PlayerGui)
-local button = Instance.new("TextButton", screenGui)
-
-button.Size = UDim2.new(0, 200, 0, 50)
-button.Position = UDim2.new(0.5, -100, 0.9, -25)
-button.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
-button.Text = "Ir para o Segundo Mar"
-button.TextSize = 20
-button.TextColor3 = Color3.new(1, 1, 1)
-
--- Conectar a função ao botão
-button.MouseButton1Click:Connect(function()
-    goToSea2()
 end)
