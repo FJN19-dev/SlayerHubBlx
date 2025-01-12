@@ -1,7 +1,7 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Slayer HuB" .. Fluent.Version,
+    Title = "Slayer Hub"
     SubTitle = "by FJN,Wendel, Lorenzo",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
