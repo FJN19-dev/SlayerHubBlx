@@ -1,7 +1,7 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Slayer Hub"
+    Title = "Slayer Hub [Premium]" .. Fluent.Version,
     SubTitle = "by FJN,Wendel, Lorenzo",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
@@ -10,7 +10,7 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
 --[[
-   Title = |Slayer Hub Premium 
+   Title = String
    SubTitle = String
    TabWidth = Value
    Size = UDim2 Value
@@ -18,7 +18,6 @@ local Window = Fluent:CreateWindow({
    Theme = String
    MinimizeKey = String
 ]]
-
 local Tab = Window:CreateTab(" 🏠 |Main", nil) -- Title, Image
 
 local Toggle = Tab:CreateToggle({
@@ -53,40 +52,7 @@ spawn(function()
 
                         -- Verifica se o jogador está dentro da distância especificada e visível
                         if distance >= _G.Min_Distance and distance <= _G.Max_Distance then
-                            local screenPos, isVisible = camera:WorldToScreenPoint(playerPos)
-                            if isVisible then
-                                local mousePos = Vector2.new(mouse.X, mouse.Y)
-                                local targetPos = Vector2.new(screenPos.X, screenPos.Y)
-                                local fovDist = (targetPos - mousePos).Magnitude
-                                
-                                -- Verifica se está dentro do FOV e é o mais próximo
-                                if fovDist < MaxDist and fovDist <= _G.Select_Size_Fov then
-                                    MaxDist = fovDist
-                                    _G.Aim_Players = v
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- Hook para redirecionar a mira do aimbot
-spawn(function()
-    local gg = getrawmetatable(game)
-    local old = gg.__namecall
-    setreadonly(gg, false)
-    gg.__namecall = newcclosure(function(...)
-        local method = getnamecallmethod()
-        local args = {...}
-        if tostring(method) == "FireServer" then
-            if tostring(args[1]) == "RemoteEvent" then
-                if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
-                    if _G.Aimbot_Skill_Fov and _G.Aim_Players and _G.Aim_Players.Character then
-                        args[2] = _G.Aim_Players.Character.HumanoidRootPart.Position
-                        return old(unpack(args))
+                            local screenPos, isVisible = camera:WorldToScreenPoint(playerPos)                       return old(unpack(args))
                     end
                 end
             end
