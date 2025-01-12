@@ -26,38 +26,22 @@ local Tab = Window:AddTab({ Title = "Teleporte", Icon = "🏙️" })
     Icon = String
 ]]
 
--- Criação da GUI
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Button = Instance.new("TextButton")
+-- Referência ao jogador
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Configurações da GUI
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.Name = "CustomInterface"
+-- Função para teletransportar ao Segundo Mar
+local function teleportToSea2()
+    -- Coordenadas do Segundo Mar (ajuste conforme necessário)
+    local sea2Position = Vector3.new(5000, 10, 5000)
+    humanoidRootPart.CFrame = CFrame.new(sea2Position)
+    print("Você foi teletransportado para o Segundo Mar!")
+end
 
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Frame.Size = UDim2.new(0, 200, 0, 100)
-Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-
-Button.Parent = Frame
-Button.Text = "Ir para o Segundo Mar"
-Button.Size = UDim2.new(0, 180, 0, 50)
-Button.Position = UDim2.new(0, 10, 0, 25)
-Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.Font = Enum.Font.SourceSans
-Button.TextSize = 20
-
--- Ação do botão
-Button.MouseButton1Click:Connect(function()
-    -- Código para teletransportar o jogador para o segundo mar
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    
-    if character then
-        local secondSeaPosition = Vector3.new(0, 100, 0) -- Altere para as coordenadas do Segundo Mar
-        character:SetPrimaryPartCFrame(CFrame.new(secondSeaPosition))
-        print("Você foi teletransportado para o Segundo Mar!")
+-- Atalho para executar a função
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then -- Pressione F para ir ao Segundo Mar
+        teleportToSea2()
     end
 end)
