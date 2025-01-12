@@ -45,3 +45,32 @@ end)
     Title = String
     Default = Boolean
 ]]
+
+local Toggle = Tab:AddToggle("MyToggle", {Title = "🏙️Teleporta Mar 3", Default = false })
+
+Toggle:OnChanged(function(Value)
+    print("Toggle changed:", Value)
+-- Script de Teleporte para o Terceiro Mar (Sea 3) com verificação de nível
+local player = game.Players.LocalPlayer
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+local level = player.Data.Level.Value -- Substitua "Data.Level" se a hierarquia for diferente
+
+-- Nível necessário para ir ao Sea 3
+local requiredLevel = 1500
+
+if level >= requiredLevel then
+    if humanoidRootPart then
+        -- Coordenadas do Sea 3 (ajuste se necessário)
+        humanoidRootPart.CFrame = CFrame.new(4000, 10, 7000) -- Altere as coordenadas caso necessário
+        print("Teleportado para o Sea 3!")
+    else
+        warn("HumanoidRootPart não encontrado! Certifique-se de que seu personagem está carregado.")
+    end
+else
+    warn("Você precisa ser nível " .. requiredLevel .. " para teleportar para o Sea 3!")
+ end
+end)
+--[[
+    Title = String
+    Default = Boolean
+]]
