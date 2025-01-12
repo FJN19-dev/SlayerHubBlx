@@ -4,7 +4,7 @@ local Window = Rayfield:CreateWindow({
    Name = "Slayer Hub [by FJN,Wendelx e Lorenzo]",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "Slayer Hub",
-   LoadingSubtitle = "by FJN ,Wendellx e Lorenzo",
+   LoadingSubtitle = "by FJN Wendellx e Lorenzo",
    Theme = "Amethyst", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
    DisableRayfieldPrompts = false,
