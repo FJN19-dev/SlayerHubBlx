@@ -26,22 +26,22 @@ local Tab = Window:AddTab({ Title = "Teleporte", Icon = "🏙️" })
     Icon = String
 ]]
 
--- Referência ao jogador
+local Toggle = Tab:AddToggle("MyToggle", {Title = "Teleporta Mar 2 🗽", Default = false })
+
+Toggle:OnChanged(function(Value)
+    print("Toggle changed:", Value)
+ -- Script de Teleporte para o Segundo Mar (Sea 2)
 local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
--- Função para teletransportar ao Segundo Mar
-local function teleportToSea2()
-    -- Coordenadas do Segundo Mar (substitua pelas coordenadas corretas)
-    local sea2Position = Vector3.new(5000, 10, 5000)
-    humanoidRootPart.CFrame = CFrame.new(sea2Position)
-    print("Teleporte para o Segundo Mar concluído!")
-end
-
--- Detecta quando uma tecla é pressionada
-game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
-    if not isProcessed and input.KeyCode == Enum.KeyCode.F then -- Pressione F para teleportar
-        teleportToSea2()
-    end
+if humanoidRootPart then
+    -- Coordenadas do Sea 2 (altere se necessário)
+    humanoidRootPart.CFrame = CFrame.new(2200, 10, 3800)
+    print("Teleportado para o Sea 2!")
+else
+    warn("HumanoidRootPart não encontrado! Certifique-se de que seu personagem está carregado.")
 end)
+--[[
+    Title = String
+    Default = Boolean
+]]
