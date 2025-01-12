@@ -19,49 +19,78 @@ local Window = Fluent:CreateWindow({
    MinimizeKey = String
 ]]
 
-local ScreenGui = Instance.new("ScreenGui")
-local ImageLabel = Instance.new("ImageLabel")
-local UICorner = Instance.new("UICorner")
-
--- Propriedades do ScreenGui
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.Name = "MovableImageLabelGui"
-
--- Propriedades do ImageLabel
-ImageLabel.Parent = ScreenGui
-ImageLabel.Name = "MovableImageLabel"
-ImageLabel.Size = UDim2.new(0, 50, 0, 50) -- Pequeno e quadrado
-ImageLabel.Position = UDim2.new(0.5, -25, 0.5, -25) -- Centralizado na tela
-ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Cor de fundo
-ImageLabel.Image = "rbxassetid://1234567890" -- Substitua pelo ID da sua imagem
-ImageLabel.BorderSizePixel = 0
-
--- Opcional: Bordas arredondadas (remova se não quiser)
-UICorner.CornerRadius = UDim.new(0, 8) -- Arredondamento leve
-UICorner.Parent = ImageLabel
-
--- Função para tornar o ImageLabel móvel
-local UIS = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    ImageLabel.Position = UDim2.new(
-        startPos.X.Scale, startPos.X.Offset + delta.X,
-        startPos.Y.Scale, startPos.Y.Offset + delta.Y
-    )
-end
-
-ImageLabel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = ImageLabel.Position
-
-        input.Changed:Connect(function()
 
 local Tab = Window:AddTab({ Title = "Teleporte", Icon = "🏙️" })
 --[[
     Title = String
     Icon = String
 ]]
+
+-- Script: Botão para viajar ao Sea 2
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+
+-- Função para mover até o NPC
+local function moveTo(position)
+    local humanoid = char:WaitForChild("Humanoid")
+    humanoid:MoveTo(position)
+    humanoid.MoveToFinished:Wait()
+end
+
+-- Função para interagir com o NPC
+local function interactWithNPC(npc)
+    fireclickdetector(npc:FindFirstChild("ClickDetector"))
+end
+
+-- Função principal para ir ao Sea 2
+local function goToSea2()
+    local levelRequired = 700 -- Nível necessário para ir ao Sea 2
+    if player.Data.Level.Value < levelRequired then
+        warn("Você precisa estar no nível " .. levelRequired .. " para ir ao Segundo Mar.")
+        return
+    end
+
+    -- Localização do NPC que transporta para o Segundo Mar
+    local sea2NPC = nil
+    for _, npc in pairs(workspace:GetDescendants()) do
+        if npc:IsA("Model") and npc:FindFirstChild("NameTag") and npc.NameTag.Text == "Sea 2 NPC" then
+            sea2NPC = npc
+            break
+        end
+    end
+
+    if not sea2NPC then
+        warn("NPC para o Segundo Mar não encontrado.")
+        return
+    end
+
+    -- Mover até o NPC e interagir
+    moveTo(sea2NPC.PrimaryPart.Position)
+    interactWithNPC(sea2NPC)
+
+    -- Confirmar a viagem
+    wait(2)
+    local gui = player.PlayerGui:FindFirstChild("Sea2ConfirmationGUI")
+    if gui then
+        gui.ConfirmButton.MouseButton1Click:Fire()
+        print("Viajando para o Segundo Mar...")
+    else
+        warn("Não foi possível encontrar o botão de confirmação.")
+    end
+end
+
+-- Criar botão na tela
+local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+local button = Instance.new("TextButton", screenGui)
+
+button.Size = UDim2.new(0, 200, 0, 50)
+button.Position = UDim2.new(0.5, -100, 0.9, -25)
+button.BackgroundColor3 = Color3.fromRGB(0, 128, 255)
+button.Text = "Ir para o Segundo Mar"
+button.TextSize = 20
+button.TextColor3 = Color3.new(1, 1, 1)
+
+-- Conectar a função ao botão
+button.MouseButton1Click:Connect(function()
+    goToSea2()
+end)
