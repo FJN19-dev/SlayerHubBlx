@@ -33,15 +33,15 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 -- Função para teletransportar ao Segundo Mar
 local function teleportToSea2()
-    -- Coordenadas do Segundo Mar (ajuste conforme necessário)
+    -- Coordenadas do Segundo Mar (substitua pelas coordenadas corretas)
     local sea2Position = Vector3.new(5000, 10, 5000)
     humanoidRootPart.CFrame = CFrame.new(sea2Position)
-    print("Você foi teletransportado para o Segundo Mar!")
+    print("Teleporte para o Segundo Mar concluído!")
 end
 
--- Atalho para executar a função
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F then -- Pressione F para ir ao Segundo Mar
+-- Detecta quando uma tecla é pressionada
+game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
+    if not isProcessed and input.KeyCode == Enum.KeyCode.F then -- Pressione F para teleportar
         teleportToSea2()
     end
 end)
