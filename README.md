@@ -27,93 +27,103 @@ local Tab = Window:AddTab({ Title = "🐲 Farme", Icon = "" })
 local Toggle = Tab:AddToggle("MyToggle", {Title = "Farm level", Default = false })
 
 Toggle:OnChanged(function()
-    print("Toggle changed:", Options.MyToggle.Value)
-    -- Configuração Principal
-getgenv().AutoFarm = true -- Ativado por padrão
-
--- Função para pegar missões
-local function pegarMissao(npcName, missao)
+    print("Toggle changed:", Options.MyToggle.Valu
     local player = game.Players.LocalPlayer
-    local humanoidRootPart = player.Character:WaitForChild("HumanoidRootPart")
-    local npc = workspace.NPCs:FindFirstChild(npcName)
+local character = player.Character or player.CharacterAdded:Wait()
+local runService = game:GetService("RunService")
 
-    if npc then
-        humanoidRootPart.CFrame = npc.HumanoidRootPart.CFrame
-        wait(1)
+-- Configurações
+local autoFarm = true
+local currentMission = nil
+local targetNPC = nil
+local farmDistance = 10
 
-        -- Solicitar a missão ao NPC
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", missao, 1)
-        wait(1)
-    end
-end
+-- Lista de NPCs e Missões por Nível
+local farmData = {
+    {minLevel = 0, maxLevel = 10, npc = "Bandit", mission = "Bandit Quest"},
+    {minLevel = 10, maxLevel = 30, npc = "Pirate", mission = "Pirate Quest"},
+    {minLevel = 30, maxLevel = 60, npc = "Monkey", mission = "Monkey Quest"},
+    {minLevel = 60, maxLevel = 120, npc = "Desert Bandit", mission = "Desert Bandit Quest"},
+    {minLevel = 120, maxLevel = 200, npc = "Snow Bandit", mission = "Snow Bandit Quest"},
+    {minLevel = 200, maxLevel = 300, npc = "Sky Bandit", mission = "Sky Bandit Quest"},
+    {minLevel = 300, maxLevel = 700, npc = "Magma Admiral", mission = "Magma Admiral Quest"}
+}
 
--- Função para atacar os NPCs
-local function atacarNPCs(npcFolder)
-    local player = game.Players.LocalPlayer
-    local humanoidRootPart = player.Character:WaitForChild("HumanoidRootPart")
-    local npcs = workspace.Enemies:FindFirstChild(npcFolder)
-
-    if npcs then
-        for _, npc in pairs(npcs:GetChildren()) do
-            if npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-                humanoidRootPart.CFrame = npc.HumanoidRootPart.CFrame + Vector3.new(0, 0, 3)
-                wait(0.2)
-
-                -- Atacar o NPC
-                repeat
-                    game:GetService("VirtualUser"):CaptureController()
-                    game:GetService("VirtualUser"):Button1Down(Vector2.new(0, 0, 0))
-                    wait(0.1)
-                until npc.Humanoid.Health <= 0 or not getgenv().AutoFarm
-            end
+-- Função para detectar a missão correta
+function getMission(level)
+    for _, data in pairs(farmData) do
+        if level >= data.minLevel and level <= data.maxLevel then
+            return data
         end
     end
 end
 
--- Função Principal de Farm
-local function autoFarm()
-    local player = game.Players.LocalPlayer
-
-    while getgenv().AutoFarm do
-        local level = player.Data.Level.Value
-
-        pcall(function()
-            if level >= 1 and level < 15 then
-                pegarMissao("Bandit Quest Giver", "Bandit")
-                atacarNPCs("Bandit")
-            elseif level >= 15 and level < 30 then
-                pegarMissao("Jungle Quest Giver", "Monkey")
-                atacarNPCs("Monkey")
-            elseif level >= 30 and level < 60 then
-                pegarMissao("Jungle Quest Giver", "Gorilla")
-                atacarNPCs("Gorilla")
-            elseif level >= 60 and level < 100 then
-                pegarMissao("Pirate Quest Giver", "Pirate")
-                atacarNPCs("Pirate")
-            elseif level >= 100 and level < 150 then
-                pegarMissao("Desert Quest Giver", "Desert Bandit")
-                atacarNPCs("Desert Bandit")
-            elseif level >= 150 and level < 200 then
-                pegarMissao("Desert Quest Giver", "Desert Officer")
-                atacarNPCs("Desert Officer")
-            else
-                print("Auto Farm completo ou nível não configurado!")
-                getgenv().AutoFarm = false
-            end
-        end)
-
-        wait(1)
+-- Função para ir até um local
+function moveTo(position)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid:MoveTo(position)
+        repeat wait() until (character.HumanoidRootPart.Position - position).Magnitude <= 2
     end
 end
 
--- Ativar o Auto Farm
-spawn(autoFarm)
+-- Função para coletar missão
+function collectMission(missionName)
+    for _, npc in pairs(game.Workspace.NPCs:GetChildren()) do
+        if npc.Name == missionName then
+            moveTo(npc.HumanoidRootPart.Position)
+            fireproximityprompt(npc.ProximityPrompt)
+            wait(1)
+        end
+    end
+end
 
--- Tecla para Desativar
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.P then -- Pressione "P" para desativar
-        getgenv().AutoFarm = false
-        print("Auto Farm desativado!")
+-- Função para encontrar NPCs
+function getClosestNPC(target)
+    local closestNPC = nil
+    local shortestDistance = math.huge
+    for _, npc in pairs(game.Workspace.Enemies:GetChildren()) do
+        if npc.Name == target and npc:FindFirstChild("HumanoidRootPart") then
+            local distance = (npc.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestNPC = npc
+            end
+        end
+    end
+    return closestNPC
+end
+
+-- Loop principal de Auto Farm
+spawn(function()
+    while autoFarm do
+        local level = player.Data.Level.Value
+        local missionData = getMission(level)
+        
+        if missionData then
+            -- Atualiza o alvo e a missão
+            currentMission = missionData.mission
+            targetNPC = missionData.npc
+
+            -- Coleta a missão
+            collectMission(currentMission)
+
+            -- Derrota NPCs
+            local npc = getClosestNPC(targetNPC)
+            if npc then
+                moveTo(npc.HumanoidRootPart.Position + Vector3.new(0, farmDistance, 0))
+                repeat
+                    character:FindFirstChildOfClass("Tool"):Activate()
+                    wait(0.1)
+                until not npc or npc.Humanoid.Health <= 0
+            else
+                wait(1) -- Espera até encontrar mais NPCs
+            end
+        else
+            print("Nível fora do alcance do script.")
+            wait(5)
+        end
+        wait(1)
     end
 end)
 end)
