@@ -28,28 +28,31 @@ local Toggle = Tab:AddToggle("MyToggle", {Title = "Farm level", Default = false 
 
 Toggle:OnChanged(function()
     print("Toggle changed:", Options.MyToggle.Valu
-    local player = game.Players.LocalPlayer
+    -- Script de Auto Farm do Nível 1 até a Ilha da Prisão
+repeat wait() until game:IsLoaded()
+
+local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local runService = game:GetService("RunService")
 
 -- Configurações
-local autoFarm = true
-local currentMission = nil
-local targetNPC = nil
-local farmDistance = 10
+local autoFarmEnabled = true
+local farmDistance = 10 -- Distância acima do NPC
+local farmHeight = 10 -- Altura para ficar acima do NPC
 
--- Lista de NPCs e Missões por Nível
+-- Dados de Missões e NPCs
 local farmData = {
-    {minLevel = 0, maxLevel = 10, npc = "Bandit", mission = "Bandit Quest"},
+    {minLevel = 1, maxLevel = 10, npc = "Bandit", mission = "Bandit Quest"},
     {minLevel = 10, maxLevel = 30, npc = "Pirate", mission = "Pirate Quest"},
     {minLevel = 30, maxLevel = 60, npc = "Monkey", mission = "Monkey Quest"},
-    {minLevel = 60, maxLevel = 120, npc = "Desert Bandit", mission = "Desert Bandit Quest"},
-    {minLevel = 120, maxLevel = 200, npc = "Snow Bandit", mission = "Snow Bandit Quest"},
-    {minLevel = 200, maxLevel = 300, npc = "Sky Bandit", mission = "Sky Bandit Quest"},
-    {minLevel = 300, maxLevel = 700, npc = "Magma Admiral", mission = "Magma Admiral Quest"}
+    {minLevel = 60, maxLevel = 75, npc = "Desert Bandit", mission = "Desert Bandit Quest"},
+    {minLevel = 75, maxLevel = 120, npc = "Desert Officer", mission = "Desert Officer Quest"},
+    {minLevel = 120, maxLevel = 150, npc = "Snow Bandit", mission = "Snow Bandit Quest"},
+    {minLevel = 150, maxLevel = 200, npc = "Snowman", mission = "Snowman Quest"},
+    {minLevel = 200, maxLevel = 275, npc = "Chief Warden", mission = "Prison Quest"}
 }
 
--- Função para detectar a missão correta
+-- Função para obter a missão correta
 function getMission(level)
     for _, data in pairs(farmData) do
         if level >= data.minLevel and level <= data.maxLevel then
@@ -58,7 +61,7 @@ function getMission(level)
     end
 end
 
--- Função para ir até um local
+-- Função para mover até uma posição
 function moveTo(position)
     local humanoid = character:FindFirstChild("Humanoid")
     if humanoid then
@@ -78,7 +81,7 @@ function collectMission(missionName)
     end
 end
 
--- Função para encontrar NPCs
+-- Função para encontrar o NPC mais próximo
 function getClosestNPC(target)
     local closestNPC = nil
     local shortestDistance = math.huge
@@ -94,24 +97,27 @@ function getClosestNPC(target)
     return closestNPC
 end
 
--- Loop principal de Auto Farm
+-- Loop principal do Auto Farm
 spawn(function()
-    while autoFarm do
+    while autoFarmEnabled do
         local level = player.Data.Level.Value
         local missionData = getMission(level)
-        
+
         if missionData then
-            -- Atualiza o alvo e a missão
-            currentMission = missionData.mission
-            targetNPC = missionData.npc
+            -- Atualiza a missão e o NPC alvo
+            local currentMission = missionData.mission
+            local targetNPC = missionData.npc
 
             -- Coleta a missão
             collectMission(currentMission)
 
-            -- Derrota NPCs
+            -- Encontra o NPC mais próximo
             local npc = getClosestNPC(targetNPC)
             if npc then
-                moveTo(npc.HumanoidRootPart.Position + Vector3.new(0, farmDistance, 0))
+                local npcPosition = npc.HumanoidRootPart.Position + Vector3.new(0, farmHeight, 0)
+                moveTo(npcPosition)
+
+                -- Ataca o NPC enquanto estiver vivo
                 repeat
                     character:FindFirstChildOfClass("Tool"):Activate()
                     wait(0.1)
