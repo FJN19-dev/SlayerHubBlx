@@ -1,5 +1,4 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-
 local Window = Fluent:CreateWindow({
     Title = "Slayer Hub [Premium]" .. Fluent.Version,
     SubTitle = "by FJN,Wendel, Lorenzo",
@@ -25,11 +24,12 @@ local Tab = Window:AddTab({ Title = "🐲 Farme", Icon = "" })
     Icon = String
 ]]
 
-local Toggle = Tab:AddToggle("MyToggle", {Title = "✊ Farme Lv", Default = false })
+
+local Toggle = Tab:AddToggle("MyToggle", {Title = "Farme Level", Default = false })
 
 Toggle:OnChanged(function(Value)
     print("Toggle changed:", Value)
-    -- Script de Auto Farm até a Ilha da Prisão
+    -- Auto Farm do nível 1 ao 400 - Blox Fruits
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -37,140 +37,125 @@ local virtualUser = game:GetService("VirtualUser")
 local runService = game:GetService("RunService")
 
 -- Configurações
-local farmDistance = 5 -- Distância para atacar o NPC
 local quests = {
     {
         questName = "BanditQuest1",
         questNPC = "Bandit",
-        questPosition = Vector3.new(1060, 16, 1530),
+        questPosition = Vector3.new(1060, 16, 1545),
         npcName = "Bandit",
-        requiredLevel = 0
+        requiredLevel = 1
     },
     {
-        questName = "MonkeyQuest1",
+        questName = "JungleQuest",
         questNPC = "Monkey",
-        questPosition = Vector3.new(-1299, 5, 450),
+        questPosition = Vector3.new(-1601, 36, 152),
         npcName = "Monkey",
         requiredLevel = 10
     },
     {
-        questName = "PirateQuest1",
+        questName = "JungleQuest",
+        questNPC = "Gorilla",
+        questPosition = Vector3.new(-1601, 36, 152),
+        npcName = "Gorilla",
+        requiredLevel = 15
+    },
+    {
+        questName = "BuggyQuest1",
         questNPC = "Pirate",
-        questPosition = Vector3.new(-1121, 4, 3855),
+        questPosition = Vector3.new(-1140, 4, 3826),
         npcName = "Pirate",
         requiredLevel = 30
     },
     {
-        questName = "DesertQuest1",
+        questName = "BuggyQuest1",
+        questNPC = "Brute",
+        questPosition = Vector3.new(-1140, 4, 3826),
+        npcName = "Brute",
+        requiredLevel = 40
+    },
+    {
+        questName = "BuggyQuest2",
+        questNPC = "Buggy",
+        questPosition = Vector3.new(-1140, 4, 3826),
+        npcName = "Buggy",
+        requiredLevel = 55
+    },
+    {
+        questName = "DesertQuest",
         questNPC = "Desert Bandit",
-        questPosition = Vector3.new(897, 6, 4392),
+        questPosition = Vector3.new(896, 6, 4391),
         npcName = "Desert Bandit",
         requiredLevel = 60
     },
     {
-        questName = "DesertQuest2",
+        questName = "DesertQuest",
         questNPC = "Desert Officer",
-        questPosition = Vector3.new(1572, 5, 4375),
+        questPosition = Vector3.new(896, 6, 4391),
         npcName = "Desert Officer",
+        requiredLevel = 75
+    },
+    {
+        questName = "FrozenQuest",
+        questNPC = "Snow Bandit",
+        questPosition = Vector3.new(1196, 87, -1260),
+        npcName = "Snow Bandit",
         requiredLevel = 90
     },
     {
-        questName = "PrisonQuest1",
-        questNPC = "Prisoner",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Prisoner",
+        questName = "FrozenQuest",
+        questNPC = "Snowman",
+        questPosition = Vector3.new(1196, 87, -1260),
+        npcName = "Snowman",
+        requiredLevel = 100
+    },
+    {
+        questName = "MarineQuest",
+        questNPC = "Chief Petty Officer",
+        questPosition = Vector3.new(-4966, 10, 4362),
+        npcName = "Chief Petty Officer",
         requiredLevel = 120
     },
     {
-        questName = "PrisonQuest2",
-        questNPC = "Dangerous Prisoner",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Dangerous Prisoner",
-        requiredLevel = 150
-        },
-    {
-        questName = "PrisonQuest1",
-        questNPC = "Prisoner",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Prisoner",
-        requiredLevel = 120
-    },
-    {
-        questName = "PrisonQuest2",
-        questNPC = "Dangerous Prisoner",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Dangerous Prisoner",
-        requiredLevel = 150
-    },
-    {
-        questName = "PrisonQuest3",
-        questNPC = "Warden",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Warden",
-        requiredLevel = 200
-    },
-    {
-        questName = "PrisonQuest3",
-        questNPC = "Chief Warden",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Chief Warden",
-        requiredLevel = 220
-    },
-    {
-        questName = "PrisonQuest3",
-        questNPC = "Swan",
-        questPosition = Vector3.new(4851, 5, 740),
-        npcName = "Swan",
-        requiredLevel = 250
+        questName = "MarineQuest",
+        questNPC = "Vice Admiral",
+        questPosition = Vector3.new(-4966, 10, 4362),
+        npcName = "Vice Admiral",
+        requiredLevel = 130
     },
     {
         questName = "SkyQuest1",
         questNPC = "Sky Bandit",
         questPosition = Vector3.new(-4840, 717, -2621),
         npcName = "Sky Bandit",
-        requiredLevel = 275
+        requiredLevel = 150
     },
     {
         questName = "SkyQuest2",
         questNPC = "Dark Master",
         questPosition = Vector3.new(-4972, 903, -2923),
         npcName = "Dark Master",
-        requiredLevel = 300
+        requiredLevel = 190
     },
     {
         questName = "MagmaQuest1",
         questNPC = "Military Soldier",
         questPosition = Vector3.new(-5229, 12, 8464),
         npcName = "Military Soldier",
-        requiredLevel = 375
+        requiredLevel = 250
     },
     {
         questName = "MagmaQuest2",
         questNPC = "Military Spy",
         questPosition = Vector3.new(-5229, 12, 8464),
         npcName = "Military Spy",
-        requiredLevel = 400
-    },
-    {
-        questName = "MagmaQuest3",
-        questNPC = "Magma Admiral",
-        questPosition = Vector3.new(-5229, 12, 8464),
-        npcName = "Magma Admiral",
-        requiredLevel = 450
+        requiredLevel = 300
     },
     {
         questName = "UnderwaterQuest1",
         questNPC = "Fishman Warrior",
         questPosition = Vector3.new(61163, 18, 1583),
         npcName = "Fishman Warrior",
-        requiredLevel = 475
-    },
-    {
-        questName = "UnderwaterQuest2",
-        questNPC = "Fishman Commando",
-        questPosition = Vector3.new(61163, 18, 1583),
-        npcName = "Fishman Commando",
-        requiredLevel = 500
+        requiredLevel = 375
     }
 }
 
@@ -191,7 +176,7 @@ local function farmNPCs(quest)
     for _, enemy in pairs(workspace.Enemies:GetChildren()) do
         if enemy.Name == quest.npcName and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
             repeat
-                humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 0, farmDistance)
+                humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0) -- Fica acima do NPC
                 virtualUser:CaptureController()
                 virtualUser:Button1Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
                 wait(0.1)
@@ -216,89 +201,4 @@ end)
 --[[
     Title = String
     Default = Boolean
-]]
-
-local Tab = Window:AddTab({ Title = "⚓ Itens", Icon = "" })
---[[
-    Title = String
-    Icon = String
-]]
-
-local Tab = Window:AddTab({ Title = "🏝️ Mar", Icon = "" })
---[[
-    Title = String
-    Icon = String
-]]
-
-local Tab = Window:AddTab({ Title = "🗽 Teleporte", Icon = "🏙️" })
---[[
-    Title = String
-    Icon = String
-]]
-
-local Toggle = Tab:AddToggle("MyToggle", {Title= "🌉. Teleporte Sea 2", Default = false })
-
-Toggle:OnChanged(function(Value)
-    print("Toggle changed:", Value)
-    -- Configuração do teleporte
-local requiredLevel = 700 -- Nível mínimo para ir ao Sea 2
-local sea2Position = CFrame.new(0, 10, 0) -- Substitua com as coordenadas exatas do Sea 2 no jogo
-
--- Verifica o nível do jogador e teleporta
-local player = game.Players.LocalPlayer
-local stats = player:FindFirstChild("Stats")
-local humanoidRootPart = player.Character:WaitForChild("HumanoidRootPart")
-
-if stats and stats:FindFirstChild("Level") then
-    local playerLevel = stats.Level.Value
-    if playerLevel >= requiredLevel then
-        print("Teletransportando para o Sea 2...")
-        humanoidRootPart.CFrame = sea2Position
-    else
-        warn("Você precisa ser pelo menos nível 700 para ir ao Sea 2!")
-    end
-else
-    warn("Erro ao verificar o nível do jogador!")
-end
-end)
---[[
-    Title = String
-    Default = Boolean
-]]
-
-
-local Toggle = Tab:AddToggle("MyToggle", {Title = "🏙️ Teleporte Sea 3", Default = false })
-
-Toggle:OnChanged(function(Value)
-    print("Toggle changed:", Value)
-    -- Script para Teleporte ao Sea 3
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Coordenadas do Sea 3
-local sea3TeleportPosition = Vector3.new(3874, 15, -3491) -- Altere se necessário
-
--- Verificar nível do jogador
-local requiredLevel = 1500
-if player.Data.Level.Value >= requiredLevel then
-    humanoidRootPart.CFrame = CFrame.new(sea3TeleportPosition)
-    print("Você foi teleportado para o Sea 3!")
-else
-    print("Você precisa ser nível 1500 para ir ao Sea 3.")
-end
-end)
---[[
-    Title = String
-    Default = Boolean
-]]
-local Tab = Window:AddTab({ Title = "🍎 Fruta", Icon = "" })
---[[
-    Title = String
-    Icon = String
-]]
-local Tab = Window:AddTab({ Title = "🛒Shop", Icon = "" })
---[[
-    Title = String
-    Icon = String
 ]]
