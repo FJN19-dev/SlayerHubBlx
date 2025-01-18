@@ -376,11 +376,10 @@ local Toggle = Tab:AddToggle("MyToggle", {
             end
             end
      
-local Tab = Window:AddTab({ Title = "🛒|Shop", Icon = "" })
---[[
-    Title = String
-    Icon = String
-]]
+local Tabs = {
+    Main = Window:AddTab({ Title = "🛒|Shop " }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
 Tab:AddButton({
    Title = "Darkstep V1",
    Description = "Comprar Darkstep",
