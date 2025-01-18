@@ -381,13 +381,20 @@ local Tab = Window:AddTab({ Title = "🛒|Shop", Icon = "" })
     Title = String
     Icon = String
 ]]
-
-local Botão = Guia:CriarBotão({
-   Nome = "Comprar Darkstep V1",
-   Retorno de chamada = function()
-      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDarkstepV1")
-   end,
+Tab:AddButton({
+   Title = "Darkstep V1",
+   Description = "Comprar Darkstep",
+   Callback = function()
+       print("Clicked!")
+       game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDarkstepV1")
+   end
 })
+--[[
+    Title = String
+    Description = String
+    Callback = function
+]]
+
 -- // // // Services // // // --
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
