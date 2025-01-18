@@ -65,7 +65,7 @@ end
 
 local Window = Fluent:CreateWindow({
     Title = "Slayer Hub",
-    SubTitle = " (discord.gg/J37PW97j6a)", -- discord link
+    SubTitle = "|Premium (discord.gg/J37PW97j6a)", -- discord link
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
@@ -74,7 +74,7 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Farme " }),
+    Main = Window:AddTab({ Title = "🦾|Farme " }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
