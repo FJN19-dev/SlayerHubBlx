@@ -375,7 +375,19 @@ local Toggle = Tab:AddToggle("MyToggle", {
             return false
             end
             end
+     
+local Tab = Window:AddTab({ Title = "🛒|Shop", Icon = "" })
+--[[
+    Title = String
+    Icon = String
+]]
 
+local Botão = Guia:CriarBotão({
+   Nome = "Comprar Darkstep V1",
+   Retorno de chamada = function()
+      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDarkstepV1")
+   end,
+})
 -- // // // Services // // // --
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
