@@ -644,4 +644,281 @@ Tabs.Misc:AddButton({
 	Title = "Join Pirates Team",
 	Description = "",
 	Callback = function()
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTea
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam","Pirates") 
+	end
+})
+
+Tabs.Misc:AddButton({
+	Title = "Join Marines Team",
+	Description = "",
+	Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam","Marines") 
+	end
+})
+
+local Mastery = Tabs.Misc:AddSection("Open Ui")
+
+
+Tabs.Misc:AddButton({
+	Title = "Color Haki Menu",
+	Description = "",
+	Callback = function()
+		game.Players.localPlayer.PlayerGui.Main.Colors.Visible = true
+	end
+})
+
+
+
+Tabs.Misc:AddButton({
+	Title = "Title Name Menu",
+	Description = "",
+	Callback = function()
+		local args = {
+			[1] = "getTitles"
+		}
+		game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+		game.Players.localPlayer.PlayerGui.Main.Titles.Visible = true
+	end
+})
+
+
+
+Tabs.Misc:AddButton({
+	Title = "Awakening Menu",
+	Description = "",
+	Callback = function()
+        game:GetService("Players").LocalPlayer.PlayerGui.Main.AwakeningToggler.Visible = true
+	end
+})
+
+
+local Mastery = Tabs.Misc:AddSection("Misc")
+
+
+local ToggleRejoin = Tabs.Misc:AddToggle("ToggleRejoin", {Title = "Auto Rejoin", Description = "",Default = true })
+ToggleRejoin:OnChanged(function(Value)
+	_G.AutoRejoin = Value
+end)
+
+Options.ToggleRejoin:SetValue(true)
+spawn(function()
+	while wait() do
+		if _G.AutoRejoin then
+				getgenv().rejoin = game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+					if child.Name == 'ErrorPrompt' and child:FindFirstChild('MessageArea') and child.MessageArea:FindFirstChild("ErrorFrame") then
+						game:GetService("TeleportService"):Teleport(game.PlaceId)
+					end
+				 end)
+			end
+		end
+	end)
+
+ --Ss
+local Usser = Tabs.Status:AddParagraph({
+    Title = "User :",
+    Content = "Name : "..game.Players.LocalPlayer.DisplayName.." (@"..game.Players.LocalPlayer.Name..")\nLevel : "..game:GetService("Players").LocalPlayer.Data.Level.Value.."\nBeli : "..game:GetService("Players").LocalPlayer.Data.Beli.Value.."\nFragments : "..game:GetService("Players").LocalPlayer.Data.Fragments.Value.."\nBounty : "..game:GetService("Players").LocalPlayer.leaderstats["Bounty/Honor"].Value.."\nHealth : "..game.Players.LocalPlayer.Character.Humanoid.Health.."/"..game.Players.LocalPlayer.Character.Humanoid.MaxHealth.."\nStamina : "..game.Players.LocalPlayer.Character.Energy.Value.."/"..game.Players.LocalPlayer.Character.Energy.MaxValue.."\nRace : " ..game:GetService("Players").LocalPlayer.Data.Race.Value.."\nDevil Fruit : "..game:GetService("Players").LocalPlayer.Data.DevilFruit.Value..""
+})
+
+local Time = Tabs.Status:AddParagraph({
+        Title = "Time Zone",
+        Content = ""
+    })
+    
+    local function UpdateOS()
+        local date = os.date("*t")
+        local hour = (date.hour) % 24
+        local ampm = hour < 12 and "AM" or "PM"
+        local timezone = string.format("%02i:%02i:%02i %s", ((hour -1) % 12) + 1, date.min, date.sec, ampm)
+        local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
+        local LocalizationService = game:GetService("LocalizationService")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local name = player.Name
+        local result, code = pcall(function()
+            return LocalizationService:GetCountryRegionForPlayerAsync(player)
+        end)
+        Time:SetDesc(datetime.." - "..timezone.." [ " .. code .. " ]")
+    end
+    spawn(function()
+        while true do
+            UpdateOS()
+            game:GetService("RunService").RenderStepped:Wait()
+        end
+    end)
+    
+    local Timekl = Tabs.Status:AddParagraph({
+        Title = "Time Sever",
+        Content = ""
+    })
+    
+    function UpdateTime()
+local GameTime = math.floor(workspace.DistributedGameTime+0.5)
+local Hour = math.floor(GameTime/(60^2))%24
+local Minute = math.floor(GameTime/(60^1))%60
+local Second = math.floor(GameTime/(60^0))%60
+Timekl:SetDesc("[Time Sever] : Hours : "..Hour.. "  Minutes : "..Minute.."  Seconds : "..Second)
+end
+
+spawn(function()
+ while task.wait() do
+ pcall(function()
+  UpdateTime()
+  end)
+ end
+ end)
+ 
+local FM = Tabs.Status:AddParagraph({
+        Title = "Full Moon",
+        Content = ""
+    })
+    
+    task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                    if game:GetService("Lighting").Sky.MoonTextureId=="http://www.roblox.com/asset/?id=9709149431" then
+                        FM:SetDesc("Moon: 5/5")
+                    elseif game:GetService("Lighting").Sky.MoonTextureId=="http://www.roblox.com/asset/?id=9709149052" then
+                        FM:SetDesc("Moon: 4/5")
+                    elseif game:GetService("Lighting").Sky.MoonTextureId=="http://www.roblox.com/asset/?id=9709143733" then
+                        FM:SetDesc("Moon: 3/5")
+                    elseif game:GetService("Lighting").Sky.MoonTextureId=="http://www.roblox.com/asset/?id=9709150401" then
+                        FM:SetDesc("Moon: 2/5")
+                    elseif game:GetService("Lighting").Sky.MoonTextureId=="http://www.roblox.com/asset/?id=9709149680" then
+                        FM:SetDesc("Moon: 1/5")
+                    else
+                        FM:SetDesc("Moon: 0/5")
+                    end
+                end)
+            end
+    end)     
+ 
+local Elite_Hunter_Status = Tabs.Status:AddParagraph({
+    Title = "Elite Status",
+    Content = "Status: "
+})
+
+
+spawn(function()
+    while wait() do
+        spawn(function()
+            if game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or game:GetService("ReplicatedStorage"):FindFirstChild("Urban") or game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or game:GetService("Workspace").Enemies:FindFirstChild("Urban") then
+                Elite_Hunter_Status:SetDesc("Status : ✅")    
+            else
+                Elite_Hunter_Status:SetDesc("Status : ❌")    
+            end
+        end)
+    end
+end)
+
+local Kitsune = Tabs.Status:AddParagraph({
+    Title = "Kitsune Island",
+    Content = "Status: "
+})
+
+spawn(function()
+    pcall(function()
+        while wait() do
+if game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") then
+Kitsune:SetDesc('Status : ✅')
+else
+  Kitsune:SetDesc('Status : ❌' )
+        end
+           end
+    end)
+end)
+
+local Mirragecheck = Tabs.Status:AddParagraph({
+    Title = "Mirrage Island",
+    Content = "Status: "
+})
+
+spawn(function()
+    pcall(function()
+        while wait() do
+if game.Workspace._WorldOrigin.Locations:FindFirstChild('Mirage Island') then
+Mirragecheck:SetDesc('Status : ✅')
+else
+  Mirragecheck:SetDesc('Status : ❌' )end
+        end
+    end)
+end)
+
+local FrozenIsland = Tabs.Status:AddParagraph({
+    Title = "Frozen Dimension",
+    Content = "Status: "
+})
+
+spawn(function()
+pcall(function()
+    while wait() do
+        if game.Workspace._WorldOrigin.Locations:FindFirstChild('Frozen Dimension') then
+            FrozenIsland:SetDesc('Status : ✅')
+        else
+            FrozenIsland:SetDesc('Status : ❌')
+        end
+    end
+end)
+end)
+
+
+
+-- Agora essa bomba vai
+local ScreenGui = Instance.new("ScreenGui")
+local ImageButton = Instance.new("ImageButton")
+local UICorner = Instance.new("UICorner")
+
+--Properties:
+
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+ImageButton.Parent = ScreenGui
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Position = UDim2.new(0.908554554, 0, 0.0703517571, 0)
+ImageButton.Size = UDim2.new(0, 45, 0, 45)
+ImageButton.Image = "rbxassetid://91062721750487"
+
+UICorner.Parent = ImageButton
+
+-- Adicionando a função para pressionar a tecla LeftControl
+ImageButton.MouseButton1Down:connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
+end)
+
+
+
+
+-- Addons:
+-- SaveManager (Permite ter um sistema de configurações)
+-- InterfaceManager (Permite ter um sistema de gerenciamento de interface)
+
+-- Passa a biblioteca para os nossos gerenciadores
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+-- Ignora as chaves usadas pelo ThemeManager.
+-- (não queremos que as configurações salvem temas, queremos?)
+SaveManager:IgnoreThemeSettings()
+
+-- Você pode adicionar índices de elementos que o gerenciador de configurações deve ignorar
+SaveManager:SetIgnoreIndexes({})
+
+-- Caso de uso para fazer isso dessa maneira:
+-- um hub de scripts pode ter temas em uma pasta global
+-- e configurações do jogo em uma pasta separada por jogo
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "O script foi carregado.",
+    Duration = 8
+})
+
+-- Você pode usar o SaveManager:LoadAutoloadConfig() para carregar uma configuração
+-- que foi marcada para ser carregada automaticamente!
+SaveManager:LoadAutoloadConfig()
