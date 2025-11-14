@@ -1,0 +1,155 @@
+-- 🌎 SLAYER HUB - Menu de Idioma Premium (Sem zoom, sem balanço)
+-- 💾 LocalScript dentro de StarterGui
+
+local player = game.Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+
+-- 🖼️ Fundo do menu
+local MenuImageId = "rbxassetid://87012011222284"
+
+-- 🎵 Música (toca só na entrada)
+local MusicId = "rbxassetid://1842314566" -- lofi calm
+
+-- === GUI PRINCIPAL ===
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "LanguageMenu"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- === FRAME PRINCIPAL ===
+local Frame = Instance.new("ImageLabel")
+Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0, 420, 0, 260)
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Frame.Image = MenuImageId
+Frame.ScaleType = Enum.ScaleType.Crop
+Frame.BackgroundTransparency = 0.15
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.ImageTransparency = 1
+Frame.ZIndex = 2
+Frame.ClipsDescendants = true
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 25)
+
+local UIStroke = Instance.new("UIStroke", Frame)
+UIStroke.Color = Color3.fromRGB(120, 50, 255)
+UIStroke.Thickness = 2
+UIStroke.Transparency = 0.3
+
+-- 🌈 Efeito de cor pulsante na borda
+task.spawn(function()
+	while task.wait(0.05) do
+		local t = tick() * 2
+		UIStroke.Color = Color3.fromHSV((t % 5) / 5, 0.7, 1)
+	end
+end)
+
+-- === TÍTULO ===
+local Title = Instance.new("TextLabel")
+Title.Parent = Frame
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "🌎 Select Your Language"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextScaled = true
+Title.ZIndex = 3
+Title.TextTransparency = 1
+
+-- === BOTÃO TEMPLATE ===
+local function createButton(text, color, posY)
+	local Btn = Instance.new("TextButton")
+	Btn.Parent = Frame
+	Btn.Size = UDim2.new(0.8, 0, 0, 45)
+	Btn.Position = UDim2.new(0.1, 0, 0, posY)
+	Btn.BackgroundColor3 = color
+	Btn.Text = text
+	Btn.TextColor3 = Color3.new(1, 1, 1)
+	Btn.Font = Enum.Font.GothamBold
+	Btn.TextScaled = true
+	Btn.ZIndex = 3
+	Btn.BackgroundTransparency = 0.1
+	local corner = Instance.new("UICorner", Btn)
+	corner.CornerRadius = UDim.new(0, 12)
+	return Btn
+end
+
+-- === BOTÕES ===
+local BtnEnglish = createButton("🇺🇸 English", Color3.fromRGB(70, 130, 255), 85)
+local BtnBrazil = createButton("🇧🇷 Brasil", Color3.fromRGB(0, 200, 80), 145)
+
+-- === FUNÇÃO DE ANIMAÇÃO ===
+local function tween(obj, props, time, style, dir)
+	local info = TweenInfo.new(time, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out)
+	TweenService:Create(obj, info, props):Play()
+end
+
+-- === HOVER DOS BOTÕES ===
+local function hover(btn, glow)
+	local normal = btn.BackgroundColor3
+	btn.MouseEnter:Connect(function()
+		tween(btn, {BackgroundColor3 = glow, Size = UDim2.new(0.83, 0, 0, 50)}, 0.25)
+	end)
+	btn.MouseLeave:Connect(function()
+		tween(btn, {BackgroundColor3 = normal, Size = UDim2.new(0.8, 0, 0, 45)}, 0.25)
+	end)
+end
+
+hover(BtnEnglish, Color3.fromRGB(130, 170, 255))
+hover(BtnBrazil, Color3.fromRGB(0, 255, 110))
+
+-- === ANIMAÇÃO DE ENTRADA (suave) ===
+Frame.Position = UDim2.new(0.5, 0, 0.6, 0)
+Frame.ImageTransparency = 1
+tween(Frame, {Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.8, Enum.EasingStyle.Quad)
+tween(Frame, {ImageTransparency = 0.1}, 1)
+tween(Title, {TextTransparency = 0}, 1)
+
+-- === ANIMAÇÃO SUTIL DE BRILHO NOS BOTÕES ===
+task.spawn(function()
+	while Frame.Parent do
+		tween(BtnEnglish, {BackgroundTransparency = 0.05}, 1.5)
+		tween(BtnBrazil, {BackgroundTransparency = 0.15}, 1.5)
+		task.wait(1.5)
+		tween(BtnEnglish, {BackgroundTransparency = 0.15}, 1.5)
+		tween(BtnBrazil, {BackgroundTransparency = 0.05}, 1.5)
+		task.wait(1.5)
+	end
+end)
+
+-- === SOM DE ENTRADA ===
+local Music = Instance.new("Sound", ScreenGui)
+Music.SoundId = MusicId
+Music.Volume = 0
+Music.Looped = false
+Music:Play()
+tween(Music, {Volume = 1}, 2)
+task.delay(10, function() -- dura uns 10s
+	tween(Music, {Volume = 0}, 2)
+end)
+
+-- === FECHAR MENU ===
+local function closeMenu()
+	tween(Frame, {ImageTransparency = 1, BackgroundTransparency = 1}, 0.5)
+	tween(Music, {Volume = 0}, 0.5)
+	task.wait(0.6)
+	Music:Stop()
+	ScreenGui:Destroy()
+end
+
+-- === AÇÕES ===
+BtnEnglish.MouseButton1Click:Connect(function()
+	print("🟦 English selected")
+	-- loadstring(game:HttpGet("https://seuscript/english.lua"))()
+	closeMenu()
+end)
+
+BtnBrazil.MouseButton1Click:Connect(function()
+	print("🟩 Português selecionado")
+	-- loadstring(game:HttpGet("https://seuscript/brasil.lua"))()
+	closeMenu()
+end)
