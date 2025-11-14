@@ -150,6 +150,6 @@ end)
 
 BtnBrazil.MouseButton1Click:Connect(function()
 	print("🟩 Português selecionado")
-	-- loadstring(game:HttpGet("https://seuscript/brasil.lua"))()
+	-- loadstring(game:HttpGet(https://raw.githubusercontent.com/FJN19-dev/SlayerHubBlx/refs/heads/main/Universal%20slayer.lua"))()
 	closeMenu()
 end)
