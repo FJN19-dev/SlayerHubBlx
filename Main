@@ -141,15 +141,15 @@ local function closeMenu()
 	ScreenGui:Destroy()
 end
 
--- === AÇÕES ===
 BtnEnglish.MouseButton1Click:Connect(function()
 	print("🟦 English selected")
-	-- loadstring(game:HttpGet("https://seuscript/english.lua"))()
+	loadstring(game:HttpGet("https://seuscript/english.lua", true))()
 	closeMenu()
 end)
 
 BtnBrazil.MouseButton1Click:Connect(function()
 	print("🟩 Português selecionado")
-	-- loadstring(game:HttpGet(https://raw.githubusercontent.com/FJN19-dev/SlayerHubBlx/refs/heads/main/Universal%20slayer.lua"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/FJN19-dev/SlayerHubBlx/refs/heads/main/Universal%20slayer.lua", true))()
 	closeMenu()
 end)
+
