@@ -150,3 +150,31 @@ task.spawn(function()
         end
     end
 end)
+
+local rs = game:GetService("ReplicatedStorage")
+local craftRemote = rs.Modules.Net["RF/Craft"]
+
+local Toggle = Tabs.Main:AddToggle("AutoBuyBait", {
+    Title = "Auto Buy Basic Bait",
+    Default = false
+})
+
+Toggle:OnChanged(function(state)
+    _G.AutoBuyBasicBait = state
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do  -- delay configurável
+        if _G.AutoBuyBasicBait then
+            -- tentar craftar
+            pcall(function()
+                craftRemote:InvokeServer("Craft", "Basic Bait", {})
+            end)
+
+            -- checar status
+            pcall(function()
+                craftRemote:InvokeServer("Check", "Basic Bait")
+            end)
+        end
+    end
+end)
