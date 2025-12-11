@@ -135,7 +135,7 @@ task.spawn(function()
                 ----------------------------------------------------
                 if (state == "ReeledIn" or serverState == "ReeledIn") and castPos then
                     fishRequest:InvokeServer("StartCasting")
-                    task.wait()
+                    task.wait(0,3)
                     fishRequest:InvokeServer("CastLineAtLocation", castPos, 100, true)
 
                 ----------------------------------------------------
@@ -150,4 +150,3 @@ task.spawn(function()
         end
     end
 end)
-
