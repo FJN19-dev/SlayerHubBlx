@@ -1,3 +1,31 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Slayer Hub|Beta",
+    SubTitle = "by FJN,Lorenzo",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Amethyst",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    St = Window:AddTab({ Title = "Status", Icon = "user-cog" }),
+    Main = Window:AddTab({ Title = "Main", Icon = "armchair" }),
+    Sub = Window:AddTab({ Title = "Sub Farm", Icon = "swords" }),
+    Quest = Window:AddTab({ Title = "Quest/Items", Icon = "scroll" }),
+    Players = Window:AddTab({ Title = "Players/ESP", Icon = "user" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "wand" }),
+    Sea = Window:AddTab({ Title = "Sea Event", Icon = "waves" }),
+    Other = Window:AddTab({ Title = "Draco", Icon = "" }),
+    Fruit = Window:AddTab({ Title = "Fruit/Raid", Icon = "cherry" }),
+    Race = Window:AddTab({ Title = "Race", Icon = "chevrons-right" }),
+    Shop = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "list-plus" }),
+    Settings = Window:AddTab({ Title = "Setting", Icon = "settings" })
+}
+
 -- ============================
 -- CONFIGS GERAIS
 -- ============================
@@ -140,5 +168,33 @@ task.spawn(function()
             end
         end
 
+    end
+end)
+
+local rs = game:GetService("ReplicatedStorage")
+local craftRemote = rs.Modules.Net["RF/Craft"]
+
+local Toggle = Tabs.Main:AddToggle("AutoBuyBait", {
+    Title = "Auto Buy Basic Bait",
+    Default = false
+})
+
+Toggle:OnChanged(function(state)
+    _G.AutoBuyBasicBait = state
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do  -- delay configurável
+        if _G.AutoBuyBasicBait then
+            -- tentar craftar
+            pcall(function()
+                craftRemote:InvokeServer("Craft", "Basic Bait", {})
+            end)
+
+            -- checar status
+            pcall(function()
+                craftRemote:InvokeServer("Check", "Basic Bait")
+            end)
+        end
     end
 end)
