@@ -198,3 +198,120 @@ task.spawn(function()
         end
     end
 end)
+
+
+-- VAR GLOBAL DO ESP
+_G.ESPPlayers = false
+
+-- CRIA O TOGGLE NO MENU
+local ESPToggle = Tabs.Main:AddToggle("ESPPlayersToggle", {
+    Title = "ESP Players",
+    Default = false
+})
+
+ESPToggle:OnChanged(function(v)
+    _G.ESPPlayers = v
+
+    -- Remove ESP quando desligar
+    if not v then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Head") then
+                local old = plr.Character.Head:FindFirstChild("ESPTag")
+                if old then old:Destroy() end
+            end
+        end
+    end
+end)
+
+
+-- =========================================================
+-- SISTEMA ESP
+-- =========================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+
+function CreateESP(player)
+    if player == LocalPlayer then return end
+    if not player.Character then return end
+    if not player.Character:FindFirstChild("Head") then return end
+
+    local head = player.Character.Head
+
+    -- Impedir duplicação
+    if head:FindFirstChild("ESPTag") then
+        return head.ESPTag
+    end
+
+    -- Criar Billboard
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESPTag"
+    billboard.Parent = head
+    billboard.Adornee = head
+    billboard.Size = UDim2.new(4, 0, 4, 0)
+    billboard.AlwaysOnTop = true
+
+    local frame = Instance.new("Frame", billboard)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BackgroundTransparency = 0.35
+    frame.BorderSizePixel = 0
+
+    -- Foto do player
+    local image = Instance.new("ImageLabel", frame)
+    image.Size = UDim2.new(1, 0, 0.6, 0)
+    image.BackgroundTransparency = 1
+    image.Image = Players:GetUserThumbnailAsync(
+        player.UserId,
+        Enum.ThumbnailType.HeadShot,
+        Enum.ThumbnailSize.Size420x420
+    )
+
+    -- Nome
+    local nameLabel = Instance.new("TextLabel", frame)
+    nameLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    nameLabel.Position = UDim2.new(0, 0, 0.6, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.TextScaled = true
+    nameLabel.Text = player.Name
+
+    -- Distância
+    local distLabel = Instance.new("TextLabel", frame)
+    distLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    distLabel.Position = UDim2.new(0, 0, 0.8, 0)
+    distLabel.BackgroundTransparency = 1
+    distLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    distLabel.TextScaled = true
+    distLabel.Text = "0m"
+
+    return billboard, distLabel
+end
+
+
+-- LOOP DE UPDATE
+RunService.RenderStepped:Connect(function()
+    if not _G.ESPPlayers then return end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local char = player.Character
+            if char and char:FindFirstChild("Head") then
+
+                local espGui, dist = CreateESP(player)
+
+                if espGui and dist then
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    local myhrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+                    if hrp and myhrp then
+                        local distance = (hrp.Position - myhrp.Position).Magnitude
+                        dist.Text = math.floor(distance) .. "m"
+                    end
+                end
+            end
+        end
+    end
+end)
