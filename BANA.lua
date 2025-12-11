@@ -200,35 +200,38 @@ task.spawn(function()
 end)
 
 
+-- ESP Blox Fruits: foto à esquerda + "Nome | Distância" (roxo / vermelho)
 _G.ESPPlayers = false
-
-local ToggleESP = Tabs.Main:AddToggle("ESPPlayersToggle", {
-    Title = "ESP Players",
-    Default = false
-})
-
-ToggleESP:OnChanged(function(v)
-    _G.ESPPlayers = v
-
-    if not v then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local old = plr.Character.HumanoidRootPart:FindFirstChild("BFESP")
-                if old then old:Destroy() end
-            end
-        end
-    end
-end)
-
----------------------------------------------------------
-------------------- ESP SYSTEM BF ------------------------
----------------------------------------------------------
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 
-function CreateBFESP(player)
+-- Toggle (assume Tabs.Main existe)
+local Toggle = Tabs.Main:AddToggle("ESPPlayersToggle", {
+    Title = "ESP Players",
+    Default = false
+})
+
+Toggle:OnChanged(function(v)
+    _G.ESPPlayers = v
+
+    if not v then
+        -- remove todos
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+                local root = plr.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local old = root:FindFirstChild("BFESP")
+                    if old then old:Destroy() end
+                end
+            end
+        end
+    end
+end)
+
+-- cria ESP se não existir, sem fundo (apenas Image + Text)
+local function CreateBFESP(player)
     if player == LP then return end
     if not player.Character then return end
 
@@ -239,76 +242,77 @@ function CreateBFESP(player)
         return root.BFESP
     end
 
-    local esp = Instance.new("BillboardGui")
-    esp.Name = "BFESP"
-    esp.Parent = root
-    esp.Adornee = root
-    esp.Size = UDim2.new(8, 0, 8, 0) -- Aumentado (bem grande)
-    esp.AlwaysOnTop = true
+    local gui = Instance.new("BillboardGui")
+    gui.Name = "BFESP"
+    gui.Parent = root
+    gui.Adornee = root
+    gui.Size = UDim2.new(6, 0, 1.2, 0) -- largura maior para foto + texto
+    gui.StudsOffset = Vector3.new(0, 2.5, 0)
+    gui.AlwaysOnTop = true
 
-    local bg = Instance.new("Frame", esp)
-    bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundTransparency = 0.35
-    bg.BackgroundColor3 = Color3.fromRGB(80, 0, 120) -- Roxo padrão
-    bg.BorderSizePixel = 3
-    bg.BorderColor3 = Color3.fromRGB(255,255,255) -- Borda branca
-
-    local img = Instance.new("ImageLabel", bg)
-    img.Position = UDim2.new(0.1, 0, 0.05, 0)
-    img.Size = UDim2.new(0.8, 0, 0.55, 0)
+    -- imagem (esquerda)
+    local img = Instance.new("ImageLabel")
+    img.Name = "IMG"
+    img.Size = UDim2.new(0.22, 0, 0.95, 0)
+    img.Position = UDim2.new(0, 0, 0.025, 0)
     img.BackgroundTransparency = 1
-    img.Image = Players:GetUserThumbnailAsync(player.UserId,
-        Enum.ThumbnailType.HeadShot,
-        Enum.ThumbnailSize.Size420x420
-    )
+    img.BorderSizePixel = 0
+    img.Parent = gui
+    -- preencher imagem async (pode falhar em alguns envs)
+    local ok, thumb = pcall(function()
+        return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+    end)
+    if ok and thumb then
+        img.Image = thumb
+    else
+        img.Image = "" -- sem imagem se falhar
+    end
 
-    local name = Instance.new("TextLabel", bg)
-    name.Position = UDim2.new(0, 0, 0.62, 0)
-    name.Size = UDim2.new(1, 0, 0.18, 0)
-    name.BackgroundTransparency = 1
-    name.TextColor3 = Color3.fromRGB(255, 255, 255)
-    name.TextStrokeTransparency = 0
-    name.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-    name.TextScaled = true
-    name.Font = Enum.Font.GothamBold
-    name.Text = player.Name
+    -- texto (direita): "Nome | Distância"
+    local txt = Instance.new("TextLabel")
+    txt.Name = "TXT"
+    txt.Size = UDim2.new(0.75, 0, 0.95, 0)
+    txt.Position = UDim2.new(0.25, 0, 0.025, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = true
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+    txt.TextYAlignment = Enum.TextYAlignment.Center
+    txt.Font = Enum.Font.GothamBold
+    txt.Text = player.Name .. " | 0m"
+    txt.TextColor3 = Color3.fromRGB(150, 0, 200) -- roxo padrão
+    txt.TextStrokeTransparency = 0.5
+    txt.Parent = gui
 
-    local dist = Instance.new("TextLabel", bg)
-    dist.Position = UDim2.new(0, 0, 0.82, 0)
-    dist.Size = UDim2.new(1, 0, 0.18, 0)
-    dist.BackgroundTransparency = 1
-    dist.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dist.TextStrokeTransparency = 0
-    dist.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-    dist.TextScaled = true
-    dist.Font = Enum.Font.GothamBlack
-    dist.Text = "0m"
-
-    return esp, dist, bg
+    return gui, img, txt
 end
 
+-- update loop
 RunService.RenderStepped:Connect(function()
     if not _G.ESPPlayers then return end
+
+    local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
 
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= LP and plr.Character then
             local root = plr.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                local esp, distLabel, bg = CreateBFESP(plr)
+            if not root then
+                -- tenta limpar se existir antigo
+                local potential = plr.Character:FindFirstChild("BFESP")
+                if potential then potential:Destroy() end
+                continue
+            end
 
-                if esp and distLabel then
-                    local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-                    if myRoot then
-                        local distance = (root.Position - myRoot.Position).Magnitude
-                        distLabel.Text = math.floor(distance) .. "m"
+            local gui, img, txt = CreateBFESP(plr)
+            if gui and txt then
+                local distance = math.floor((root.Position - myRoot.Position).Magnitude)
+                txt.Text = plr.Name .. " | " .. tostring(distance) .. "m"
 
-                        -- COR DINÂMICA
-                        if distance >= 5000 then
-                            bg.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Vermelho
-                        else
-                            bg.BackgroundColor3 = Color3.fromRGB(80, 0, 120) -- Roxo
-                        end
-                    end
+                -- cor dinâmica (>=5000m -> vermelho)
+                if distance >= 5000 then
+                    txt.TextColor3 = Color3.fromRGB(255, 0, 0)
+                else
+                    txt.TextColor3 = Color3.fromRGB(150, 0, 200)
                 end
             end
         end
