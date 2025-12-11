@@ -334,6 +334,50 @@ local Tabs = {
 
 local Options = Fluent.Options
 
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local Player = Players.LocalPlayer
+local Remotes = ReplicatedStorage:WaitForChild("Remotes", 5)
+local CommF = Remotes:WaitForChild("CommF_", 5) 
+local PlayerGui = Player:WaitForChild("PlayerGui", 5)
+local MainGui = PlayerGui:WaitForChild("Main", 5)
+local lastNotificationTime = 0
+local notificationCooldown = 10
+local currentTime = tick()
+if currentTime - lastNotificationTime >= notificationCooldown then
+    lastNotificationTime = currentTime
+end
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EffectContainer = ReplicatedStorage:FindFirstChild("Effect") and ReplicatedStorage.Effect:FindFirstChild("Container")
+if EffectContainer then
+    local Death = EffectContainer:FindFirstChild("Death")
+    if Death then
+        local success, result = pcall(require, Death)
+        if success and type(result) == "function" then
+            hookfunction(result, function() end)
+        end
+    end
+    local Respawn = EffectContainer:FindFirstChild("Respawn")
+    if Respawn then
+        local success, result = pcall(require, Respawn)
+        if success and type(result) == "function" then
+            hookfunction(result, function() end)
+        end
+    end
+end
+local GuideModule = ReplicatedStorage:FindFirstChild("GuideModule")
+if GuideModule then
+    local success, module = pcall(require, GuideModule)
+    if success and module and type(module.ChangeDisplayedNPC) == "function" then
+        hookfunction(module.ChangeDisplayedNPC, function() end)
+    end
+end
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Util = ReplicatedStorage:WaitForChild("Util", 5)
 if Util then
