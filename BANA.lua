@@ -243,18 +243,19 @@ function CreateBFESP(player)
     esp.Name = "BFESP"
     esp.Parent = root
     esp.Adornee = root
-    esp.Size = UDim2.new(4, 0, 4, 0)
+    esp.Size = UDim2.new(8, 0, 8, 0) -- Aumentado (bem grande)
     esp.AlwaysOnTop = true
 
     local bg = Instance.new("Frame", esp)
     bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundTransparency = 0.5
-    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    bg.BorderSizePixel = 0
+    bg.BackgroundTransparency = 0.35
+    bg.BackgroundColor3 = Color3.fromRGB(80, 0, 120) -- Roxo padrão
+    bg.BorderSizePixel = 3
+    bg.BorderColor3 = Color3.fromRGB(255,255,255) -- Borda branca
 
     local img = Instance.new("ImageLabel", bg)
-    img.Position = UDim2.new(0, 0, 0, 0)
-    img.Size = UDim2.new(1, 0, 0.6, 0)
+    img.Position = UDim2.new(0.1, 0, 0.05, 0)
+    img.Size = UDim2.new(0.8, 0, 0.55, 0)
     img.BackgroundTransparency = 1
     img.Image = Players:GetUserThumbnailAsync(player.UserId,
         Enum.ThumbnailType.HeadShot,
@@ -262,22 +263,28 @@ function CreateBFESP(player)
     )
 
     local name = Instance.new("TextLabel", bg)
-    name.Position = UDim2.new(0, 0, 0.6, 0)
-    name.Size = UDim2.new(1, 0, 0.2, 0)
+    name.Position = UDim2.new(0, 0, 0.62, 0)
+    name.Size = UDim2.new(1, 0, 0.18, 0)
     name.BackgroundTransparency = 1
     name.TextColor3 = Color3.fromRGB(255, 255, 255)
+    name.TextStrokeTransparency = 0
+    name.TextStrokeColor3 = Color3.fromRGB(0,0,0)
     name.TextScaled = true
+    name.Font = Enum.Font.GothamBold
     name.Text = player.Name
 
     local dist = Instance.new("TextLabel", bg)
-    dist.Position = UDim2.new(0, 0, 0.8, 0)
-    dist.Size = UDim2.new(1, 0, 0.2, 0)
+    dist.Position = UDim2.new(0, 0, 0.82, 0)
+    dist.Size = UDim2.new(1, 0, 0.18, 0)
     dist.BackgroundTransparency = 1
-    dist.TextColor3 = Color3.fromRGB(255, 255, 0)
+    dist.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dist.TextStrokeTransparency = 0
+    dist.TextStrokeColor3 = Color3.fromRGB(0,0,0)
     dist.TextScaled = true
+    dist.Font = Enum.Font.GothamBlack
     dist.Text = "0m"
 
-    return esp, dist
+    return esp, dist, bg
 end
 
 RunService.RenderStepped:Connect(function()
@@ -287,13 +294,20 @@ RunService.RenderStepped:Connect(function()
         if plr ~= LP and plr.Character then
             local root = plr.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                local esp, distLabel = CreateBFESP(plr)
+                local esp, distLabel, bg = CreateBFESP(plr)
 
                 if esp and distLabel then
                     local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
                     if myRoot then
                         local distance = (root.Position - myRoot.Position).Magnitude
                         distLabel.Text = math.floor(distance) .. "m"
+
+                        -- COR DINÂMICA
+                        if distance >= 5000 then
+                            bg.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Vermelho
+                        else
+                            bg.BackgroundColor3 = Color3.fromRGB(80, 0, 120) -- Roxo
+                        end
                     end
                 end
             end
