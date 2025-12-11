@@ -26,111 +26,114 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Setting", Icon = "settings" })
 }
 
--- CONFIGURAÇÕES INICIAIS
+-- ============================
+-- CONFIGS GERAIS
+-- ============================
 _G.AutoFishing = false
 _G.SelectedBait = "Basic Bait"
 _G.SelectedRod = "Fishing Rod"
 
-
-----------------------------------------------------
----------------- CRIAÇÃO DOS ELEMENTOS -------------
-----------------------------------------------------
-
--- TOGGLE AUTO-FISHING
-local Toggle = Tabs.Main:AddToggle("MyToggle", {
+-- TOGGLE AUTO FISHING
+local Toggle = Tabs.Main:AddToggle("AutoFishToggle", {
     Title = "Auto Fishing",
     Default = false
 })
-Toggle:OnChanged(function(state)
-    _G.AutoFishing = state
+Toggle:OnChanged(function(v)
+    _G.AutoFishing = v
 end)
 
--- DROPDOWN BAITS
+-- DROPDOWN BAIT
 local DropdownBait = Tabs.Main:AddDropdown("BaitDropdown", {
-    Title = "Select Fishing Lure",
-    Values = {"Basic Bait","Kelp Bait","Good Bait","Abyssal Bait","Frozen Bait","Epic Bait","Carnivore Bait"},
+    Title = "Select Lure",
+    Values = {
+        "Basic Bait","Kelp Bait","Good Bait",
+        "Abyssal Bait","Frozen Bait","Epic Bait","Carnivore Bait"
+    },
     Multi = false,
     Default = "Basic Bait",
 })
-DropdownBait:OnChanged(function(value)
-    _G.SelectedBait = value
-    game.ReplicatedStorage.FishReplicated.FishingRequest:InvokeServer("SelectBait", value)
+DropdownBait:OnChanged(function(v)
+    _G.SelectedBait = v
+    game.ReplicatedStorage.FishReplicated.FishingRequest:InvokeServer("SelectBait", v)
 end)
 
--- DROPDOWN RODS
+-- DROPDOWN ROD
 local DropdownRod = Tabs.Main:AddDropdown("RodDropdown", {
-    Title = "Select Fishing Rod",
-    Values = {"Fishing Rod","Gold Rod","Shark Rod","Shell Rod","Treasure Rod"},
+    Title = "Select Rod",
+    Values = {
+        "Fishing Rod","Gold Rod","Shark Rod",
+        "Shell Rod","Treasure Rod"
+    },
     Multi = false,
     Default = "Fishing Rod",
 })
-DropdownRod:OnChanged(function(value)
-    _G.SelectedRod = value
+DropdownRod:OnChanged(function(v)
+    _G.SelectedRod = v
 end)
 
 
-----------------------------------------------------
------------------- AUTO FISH LIMPO -----------------
-----------------------------------------------------
+-- ============================
+-- SISTEMA AUTO FISH
+-- ============================
 
 local plr = game.Players.LocalPlayer
-local fishFolder = game.ReplicatedStorage.FishReplicated
-local fishRequest = fishFolder.FishingRequest
-local maxDistance = require(fishFolder.FishingClient.Config).Rod.MaxLaunchDistance
-local getWaterHeight = require(game.ReplicatedStorage.Util.GetWaterHeightAtLocation)
+local fishFolder = game.ReplicatedStorage:WaitForChild("FishReplicated")
+local fishRequest = fishFolder:WaitForChild("FishingRequest")
+local waterHeight = require(game.ReplicatedStorage.Util.GetWaterHeightAtLocation)
+
 
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.15) do
         if not _G.AutoFishing then continue end
 
         local char = plr.Character
         if not char then continue end
-
+        
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not (hrp and hum) then continue end
 
         local tool = char:FindFirstChildOfClass("Tool")
 
-        ----------------------------------------------------
-        -- EQUIPAR VARA
-        ----------------------------------------------------
-        if _G.SelectedRod and (not tool or tool.Name ~= _G.SelectedRod) then
+        -------------------------------------------------
+        -- AUTO EQUIP ROD
+        -------------------------------------------------
+        if not tool or tool.Name ~= _G.SelectedRod then
             local rod = plr.Backpack:FindFirstChild(_G.SelectedRod)
             if rod then
-                char.Humanoid:EquipTool(rod)
+                hum:EquipTool(rod)
                 task.wait(0.1)
                 tool = rod
+            else
+                continue
             end
         end
-
-        if not tool then continue end
-
-        ----------------------------------------------------
-        -- JOGAR LINHA DIRETO (SEM RAYCAST)
-        ----------------------------------------------------
-        local forwardPos = hrp.Position + hrp.CFrame.LookVector * 60
-        forwardPos = Vector3.new(forwardPos.X, getWaterHeight(hrp.Position), forwardPos.Z)
 
         local state = tool:GetAttribute("State")
         local serverState = tool:GetAttribute("ServerState")
 
-        ----------------------------------------------------
-        -- ARREMESSAR SEM TRAVAR
-        ----------------------------------------------------
-        if (state == "ReeledIn" or serverState == "ReeledIn") then
+        -------------------------------------------------
+        -- AUTO CAST (jogar a linha SEM travas)
+        -------------------------------------------------
+        if state == "ReeledIn" or serverState == "ReeledIn" then
+            local forwardPos = hrp.Position + hrp.CFrame.LookVector * 60
+            forwardPos = Vector3.new(forwardPos.X, waterHeight(hrp.Position), forwardPos.Z)
+
             fishRequest:InvokeServer("StartCasting")
             task.wait(0.25)
             fishRequest:InvokeServer("CastLineAtLocation", forwardPos, 100, true)
+        end
 
-        elseif serverState == "Biting" then
+        -------------------------------------------------
+        -- AUTO CATCH (puxar quando morder)
+        -------------------------------------------------
+        if serverState == "Biting" then
             fishRequest:InvokeServer("Catching", true)
-            task.wait(0.1)
+            task.wait(0.2)
             fishRequest:InvokeServer("Catch", 1)
         end
     end
 end)
-
-
 
 local rs = game:GetService("ReplicatedStorage")
 local craftRemote = rs.Modules.Net["RF/Craft"]
