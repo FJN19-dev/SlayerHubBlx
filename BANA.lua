@@ -200,14 +200,13 @@ task.spawn(function()
 end)
 
 
--- ESP Blox Fruits: foto à esquerda + "Nome | Distância" (roxo / vermelho)
 _G.ESPPlayers = false
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 
--- Toggle (assume Tabs.Main existe)
+-- Toggle
 local Toggle = Tabs.Main:AddToggle("ESPPlayersToggle", {
     Title = "ESP Players",
     Default = false
@@ -216,21 +215,21 @@ local Toggle = Tabs.Main:AddToggle("ESPPlayersToggle", {
 Toggle:OnChanged(function(v)
     _G.ESPPlayers = v
 
+    -- remove esp ao desligar
     if not v then
-        -- remove todos
         for _, plr in pairs(Players:GetPlayers()) do
             if plr.Character then
                 local root = plr.Character:FindFirstChild("HumanoidRootPart")
                 if root then
-                    local old = root:FindFirstChild("BFESP")
-                    if old then old:Destroy() end
+                    local esp = root:FindFirstChild("BFESP")
+                    if esp then esp:Destroy() end
                 end
             end
         end
     end
 end)
 
--- cria ESP se não existir, sem fundo (apenas Image + Text)
+-- cria esp
 local function CreateBFESP(player)
     if player == LP then return end
     if not player.Character then return end
@@ -238,81 +237,69 @@ local function CreateBFESP(player)
     local root = player.Character:FindFirstChild("HumanoidRootPart")
     if not root then return end
 
-    if root:FindFirstChild("BFESP") then
-        return root.BFESP
-    end
+    if root:FindFirstChild("BFESP") then return root.BFESP end
 
     local gui = Instance.new("BillboardGui")
     gui.Name = "BFESP"
     gui.Parent = root
     gui.Adornee = root
-    gui.Size = UDim2.new(6, 0, 1.2, 0) -- largura maior para foto + texto
-    gui.StudsOffset = Vector3.new(0, 2.5, 0)
+    gui.Size = UDim2.new(12, 0, 4, 0)   -- MUITO MAIOR
+    gui.StudsOffset = Vector3.new(0, 5, 0)
     gui.AlwaysOnTop = true
+    gui.MaxDistance = 15000   -- ESP aparece MUITO LONGE
 
-    -- imagem (esquerda)
+    -- FOTO
     local img = Instance.new("ImageLabel")
     img.Name = "IMG"
-    img.Size = UDim2.new(0.22, 0, 0.95, 0)
-    img.Position = UDim2.new(0, 0, 0.025, 0)
+    img.Size = UDim2.new(0.35, 0, 1, 0) -- imagem muito grande
+    img.Position = UDim2.new(0, 0, 0, 0)
     img.BackgroundTransparency = 1
-    img.BorderSizePixel = 0
     img.Parent = gui
-    -- preencher imagem async (pode falhar em alguns envs)
+
     local ok, thumb = pcall(function()
         return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
-    if ok and thumb then
-        img.Image = thumb
-    else
-        img.Image = "" -- sem imagem se falhar
-    end
+    if ok then img.Image = thumb end
 
-    -- texto (direita): "Nome | Distância"
+    -- TEXTO
     local txt = Instance.new("TextLabel")
     txt.Name = "TXT"
-    txt.Size = UDim2.new(0.75, 0, 0.95, 0)
-    txt.Position = UDim2.new(0.25, 0, 0.025, 0)
+    txt.Size = UDim2.new(0.65, 0, 1, 0)
+    txt.Position = UDim2.new(0.35, 0, 0, 0)
     txt.BackgroundTransparency = 1
     txt.TextScaled = true
-    txt.TextXAlignment = Enum.TextXAlignment.Left
-    txt.TextYAlignment = Enum.TextYAlignment.Center
     txt.Font = Enum.Font.GothamBold
-    txt.Text = player.Name .. " | 0m"
-    txt.TextColor3 = Color3.fromRGB(150, 0, 200) -- roxo padrão
-    txt.TextStrokeTransparency = 0.5
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+    txt.TextStrokeTransparency = 0.3
     txt.Parent = gui
+    txt.Text = player.Name .. " | 0m"
+    txt.TextColor3 = Color3.fromRGB(150, 0, 200)
 
-    return gui, img, txt
+    return gui, txt
 end
 
--- update loop
+-- loop de atualização
 RunService.RenderStepped:Connect(function()
     if not _G.ESPPlayers then return end
 
-    local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    local char = LP.Character
+    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
     if not myRoot then return end
 
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= LP and plr.Character then
             local root = plr.Character:FindFirstChild("HumanoidRootPart")
-            if not root then
-                -- tenta limpar se existir antigo
-                local potential = plr.Character:FindFirstChild("BFESP")
-                if potential then potential:Destroy() end
-                continue
-            end
+            if root then
+                local gui, txt = CreateBFESP(plr)
+                if gui and txt then
+                    local dist = math.floor((root.Position - myRoot.Position).Magnitude)
+                    txt.Text = plr.Name .. " | " .. dist .. "m"
 
-            local gui, img, txt = CreateBFESP(plr)
-            if gui and txt then
-                local distance = math.floor((root.Position - myRoot.Position).Magnitude)
-                txt.Text = plr.Name .. " | " .. tostring(distance) .. "m"
-
-                -- cor dinâmica (>=5000m -> vermelho)
-                if distance >= 5000 then
-                    txt.TextColor3 = Color3.fromRGB(255, 0, 0)
-                else
-                    txt.TextColor3 = Color3.fromRGB(150, 0, 200)
+                    if dist >= 5000 then
+                        txt.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    else
+                        txt.TextColor3 = Color3.fromRGB(160, 0, 255)
+                    end
                 end
             end
         end
