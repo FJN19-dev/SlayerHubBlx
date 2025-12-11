@@ -31,6 +31,7 @@ _G.AutoFishing = false
 _G.SelectedBait = "Basic Bait"
 _G.SelectedRod = "Fishing Rod"
 
+
 ----------------------------------------------------
 ---------------- CRIAÇÃO DOS ELEMENTOS -------------
 ----------------------------------------------------
@@ -53,9 +54,7 @@ local DropdownBait = Tabs.Main:AddDropdown("BaitDropdown", {
 })
 DropdownBait:OnChanged(function(value)
     _G.SelectedBait = value
-    local fishFolder = game.ReplicatedStorage.FishReplicated
-    local fishRequest = fishFolder.FishingRequest
-    fishRequest:InvokeServer("SelectBait", value)
+    game.ReplicatedStorage.FishReplicated.FishingRequest:InvokeServer("SelectBait", value)
 end)
 
 -- DROPDOWN RODS
@@ -71,7 +70,7 @@ end)
 
 
 ----------------------------------------------------
------------------- SISTEMA AUTO-FISH ---------------
+------------------ AUTO FISH LIMPO -----------------
 ----------------------------------------------------
 
 local plr = game.Players.LocalPlayer
@@ -93,13 +92,13 @@ task.spawn(function()
         local tool = char:FindFirstChildOfClass("Tool")
 
         ----------------------------------------------------
-        -- FORÇA EQUIPAR A VARA
+        -- EQUIPAR VARA
         ----------------------------------------------------
         if _G.SelectedRod and (not tool or tool.Name ~= _G.SelectedRod) then
             local rod = plr.Backpack:FindFirstChild(_G.SelectedRod)
             if rod then
                 char.Humanoid:EquipTool(rod)
-                task.wait(0.15)
+                task.wait(0.1)
                 tool = rod
             end
         end
@@ -107,39 +106,22 @@ task.spawn(function()
         if not tool then continue end
 
         ----------------------------------------------------
-        -- RAYCAST PARA A ÁGUA
+        -- JOGAR LINHA DIRETO (SEM RAYCAST)
         ----------------------------------------------------
-        local waterY = getWaterHeight(hrp.Position)
+        local forwardPos = hrp.Position + hrp.CFrame.LookVector * 60
+        forwardPos = Vector3.new(forwardPos.X, getWaterHeight(hrp.Position), forwardPos.Z)
 
-        local _, castPos = workspace:FindPartOnRayWithIgnoreList(
-            Ray.new(char.Head.Position, hrp.CFrame.LookVector * maxDistance),
-            {char, workspace.Characters, workspace.Enemies}
-        )
-
-        -- se raycast falhar, lança em linha reta mesmo
-        if not castPos then
-            castPos = hrp.Position + (hrp.CFrame.LookVector * 40)
-        end
-
-        castPos = Vector3.new(castPos.X, math.max(castPos.Y, waterY), castPos.Z)
-
-        ----------------------------------------------------
-        -- ESTADOS DA VARA
-        ----------------------------------------------------
         local state = tool:GetAttribute("State")
         local serverState = tool:GetAttribute("ServerState")
 
         ----------------------------------------------------
-        -- ARREMESSAR LINHA
+        -- ARREMESSAR SEM TRAVAR
         ----------------------------------------------------
         if (state == "ReeledIn" or serverState == "ReeledIn") then
             fishRequest:InvokeServer("StartCasting")
-            task.wait(0.25) -- CORRIGIDO: timing necessário
-            fishRequest:InvokeServer("CastLineAtLocation", castPos, 100, true)
+            task.wait(0.25)
+            fishRequest:InvokeServer("CastLineAtLocation", forwardPos, 100, true)
 
-        ----------------------------------------------------
-        -- PEIXE MORDENDO → PUXAR
-        ----------------------------------------------------
         elseif serverState == "Biting" then
             fishRequest:InvokeServer("Catching", true)
             task.wait(0.1)
@@ -147,6 +129,7 @@ task.spawn(function()
         end
     end
 end)
+
 
 
 local rs = game:GetService("ReplicatedStorage")
