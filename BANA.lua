@@ -28,7 +28,7 @@ local Tabs = {
 }
 
 -- Novo Toggle
-local ToggleBartilo = Tab:AddToggle("AutoBartilo", {
+local ToggleBartilo = Tabs.Main:AddToggle("AutoBartilo", {
     Title = "Auto Quest Sea Bartilo",
     Default = false
 })
@@ -189,3 +189,4 @@ spawn(function()
         end
     end)
 end)
+
