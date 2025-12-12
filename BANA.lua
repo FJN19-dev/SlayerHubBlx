@@ -27,6 +27,16 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Setting", Icon = "settings" })
 }
 
+function topos(Pos)
+    pcall(function()
+        local Char = game.Players.LocalPlayer.Character
+        if Char and Char:FindFirstChild("HumanoidRootPart") then
+            Char.HumanoidRootPart.CFrame = Char.HumanoidRootPart.CFrame:Lerp(Pos, 0.15)
+        end
+    end)
+end
+
+
 function AutoHaki()
     if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
         local args = {
