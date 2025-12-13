@@ -4430,38 +4430,7 @@ ChestTP:OnChanged(function(value)
     end
 end)
 
-local Berry = Tabs.Sub:AddToggle("Berry", {Title = "Auto Coletar Berry", Description = "", Default = false})
-Berry:OnChanged(function(Value)
-  _G.AutoBerry = Value
-end)
-spawn(function()
-  while wait(Sec) do
-    if _G.AutoBerry then
-      local CollectionService= game:GetService("CollectionService")
-      local Players= game:GetService("Players")
-      local Player = Players.LocalPlayer
-      local BerryBush = CollectionService:GetTagged("BerryBush")      
-      local Distance, Nearest = math.huge      
-      for i = 1, #BerryBush do
-        local Bush = BerryBush[i]        
-        for AttributeName, BerryName in pairs(Bush:GetAttributes()) do
-          if not BerryArray or table.find(BerryArray, BerryName) then           
-            _tp(Bush.Parent:GetPivot())
-            for i = 1, #BerryBush do
-            local Bush = BerryBush[i]        
-              for AttributeName, BerryName in pairs(Bush:GetChildren()) do
-                if not BerryArray or table.find(BerryArray, BerryName) then
-                  _tp(BerryName.WorldPivot)
-                  fireproximityprompt(BerryName.ProximityPrompt,math.huge)
-                end
-              end
-            end      
-          end
-        end
-      end      
-    end
-  end
-end)
+
 
 local Raca = Tabs.Sub:AddSection("Raças")
 
