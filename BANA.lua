@@ -2516,3 +2516,105 @@ task.spawn(function()
         end)
     end
 end)
+
+local Toggle = Main:AddToggle({
+  Name = "Auto Level",
+  Description = "This is a <font color='rgb(88, 101, 242)'>Toggle</font> Example",
+  Default = false 
+})
+Toggle:OnChanged(function(Value)
+    getgenv().AutoFarm = Value
+    StopTween(getgenv().AutoFarm)
+end)
+
+spawn(function()
+    while task.wait(0.5) do
+        if getgenv().AutoFarm then
+            pcall(function()
+                
+                CheckQuest()
+
+                local player = game:GetService("Players").LocalPlayer
+                local humanoidRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if not humanoidRoot then return end
+                
+                local questGui = player.PlayerGui.Main.Quest
+                local questVisible = questGui.Visible
+                local questTitle = questGui.Container.QuestTitle.Title.Text
+                
+                -- Se a quest for diferente → abandona
+                if not string.find(questTitle, NameMon) then
+                    getgenv().StartMagnet = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+                end
+
+                -- Se não tiver quest ativa → inicia
+                if not questVisible then
+                    getgenv().StartMagnet = false
+                    CheckQuest()
+
+                    local distance = (humanoidRoot.Position - CFrameQuest.Position).Magnitude
+                    if distance > 1500 then
+                        BTP(CFrameQuest * CFrame.new(0, 25, 5))  -- Teleporte anti-kick
+                    else
+                        topos(CFrameQuest)  -- Teleporte normal
+                    end
+
+                    -- Quando chegar no NPC → inicia quest
+                    if (humanoidRoot.Position - CFrameQuest.Position).Magnitude < 20 then
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
+
+                        -- Teleporte imediato para o spawn do monstro
+                        if CFrameMon then
+                            topos(CFrameMon)
+                        end
+                    end
+                else
+                    -- Se já tiver quest → ir matar NPCs
+                    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                        if mob:FindFirstChild("HumanoidRootPart") and 
+                           mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 and 
+                           mob.Name == Mon then
+
+                            repeat task.wait(0.1)
+                                AutoHaki()
+                                EquipWeapon(getgenv().SelectWeapon)
+
+                                -- Teleporta para o mob
+                                topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.Head.CanCollide = false
+                                getgenv().StartMagnet = true
+                                
+                                sethiddenproperty(player, "SimulationRadius", math.huge)
+
+                                ------------------------------------------------
+                                -- 🔥 PULL → puxa outros mobs do mesmo tipo 🔥
+                                ------------------------------------------------
+                                local EnemiesFolder = workspace.Enemies
+                                local Target = Mon
+                                local mobHRP = mob.HumanoidRootPart
+
+                                for _, otherMob in pairs(EnemiesFolder:GetChildren()) do
+                                    if otherMob.Name == Target 
+                                    and otherMob:FindFirstChild("Humanoid") 
+                                    and otherMob:FindFirstChild("HumanoidRootPart") 
+                                    and otherMob.Humanoid.Health > 0 
+                                    and otherMob ~= mob then
+                                        pcall(function()
+                                            otherMob.HumanoidRootPart.CFrame = mobHRP.CFrame
+                                        end)
+                                    end
+                                end
+                                ------------------------------------------------
+
+                            until not getgenv().AutoFarm or mob.Humanoid.Health <= 0 or not mob.Parent or not questGui.Visible
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
