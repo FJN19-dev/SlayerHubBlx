@@ -2268,7 +2268,7 @@ end
 
 local Section = St:AddSection({"Discord"})
 
-Tab1:AddDiscordInvite({
+St:AddDiscordInvite({
     Name = "Slayer | Community",
     Description = "Join server",
     Logo = "rbxassetid://91062721750487",
