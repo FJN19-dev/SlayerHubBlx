@@ -301,23 +301,18 @@ task.spawn(function()
 end)
 
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
 
-local Window = Library:MakeWindow({
-  Title = "Slayer Hub",
-  SubTitle = "By FJN",
-  ScriptFolder = "Slayer Hub"
+local Window = redzlib:MakeWindow({
+  Title = "Slayer Hub : Blox Fruits",
+  SubTitle = "by FJN",
+  SaveFolder = "Slayer Hub"
 })
 
-local Minimizer = Window:NewMinimizer({
-  KeyCode = Enum.KeyCode.LeftControl
+Window:AddMinimizeButton({
+    Button = { Image = "rbxassetid://91062721750487", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(35, 1) },
 })
-
-local MobileButton = Minimizer:CreateMobileMinimizer({
-  Image = "rbxassetid://91062721750487",
-  BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-})
-
     local St = Window:MakeTab({ "Status", "user-cog" })
     local Main = Window:MakeTab({ "Main", "armchair" })
     local Sub = Window:MakeTab({ "Sub Farm", "swords" })
@@ -2271,16 +2266,61 @@ function AttackNoCoolDown()
     end
 end
 
-St:AddSection("Discord")
+local Section = St:AddSection({"Discord"})
 
-St:AddDiscordInvite({
-	Title = "Slayer | Community",
-	Description = "A community for SLayer Hub Users -- official scripts, updates, and suport in one place.",
-	Banner = "rbxassetid://128134628708017", -- You can put an RGB Color: Color3.fromRGB(233, 37, 69)
-	Logo = "rbxassetid://91062721750487",
-	Invite = "https://discord.gg/NJJ7BYgWcd",
-	Members = 147, -- Optional
-	Online = 10, -- Optional
+Tab1:AddDiscordInvite({
+    Name = "Slayer | Community",
+    Description = "Join server",
+    Logo = "rbxassetid://91062721750487",
+    Invite = "https://discord.gg/NJJ7BYgWcd",
 })
 
-St:AddSection("Serve Informações")
+local Section = St:AddSection({"Server Info"})
+
+local Paragraph = St:AddParagraph({"Time Zone", ""})
+function UpdateOS()
+    local date = os.date("*t")
+    local hour = (date.hour) % 24
+    local ampm = hour < 12 and "AM" or "PM"
+    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
+    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)    
+    local LocalizationService = game:GetService("LocalizationService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local name = player.Name
+    local result, code    
+    if not getgenv().countryRegionCode then
+        result, code = pcall(function()
+            return LocalizationService:GetCountryRegionForPlayerAsync(player)
+        end)
+        if result then
+            getgenv().countryRegionCode = code
+        else
+            getgenv().countryRegionCode = "Unknown"
+        end
+    else
+        code = getgenv().countryRegionCode
+    end
+    Time:SetDesc(datetime.." - "..timezone.." [ " .. code .. " ]")
+end
+spawn(function()
+    while true do
+        UpdateOS()
+        wait(1)
+    end
+end)
+
+local Paragraph = St:AddParagraph({"Time", ""})
+function UpdateTime()
+    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
+    local Hour = math.floor(GameTime / (60^2)) % 24
+    local Minute = math.floor(GameTime / (60^1)) % 60
+    local Second = math.floor(GameTime / (60^0)) % 60
+    Timmessss:SetDesc(Hour.." Hour (h) "..Minute.." Minute (m) "..Second.." Second (s) ")
+end
+spawn(function()
+    while true do
+        UpdateTime()
+        wait(1)
+    end
+end)
