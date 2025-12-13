@@ -2339,3 +2339,54 @@ task.spawn(function()
         task.wait(1)
     end
 end)
+
+Miragecheck = St:AddParagraph({"Mirage Island", "Status: "})
+local previousStatus = ""
+spawn(function()
+    pcall(function()
+        while true do
+            wait(1)            
+            local mirageIslandExists = game.Workspace._WorldOrigin.Locations:FindFirstChild('Mirage Island') ~= nil
+            local currentStatus = mirageIslandExists and '✅️' or '❌️'
+            if currentStatus ~= previousStatus then
+                Miragecheck:SetDesc('Status: ' .. currentStatus)
+                previousStatus = currentStatus
+            end
+        end
+    end)
+end)
+
+Kitsunecheck = St:AddParagraph({"Kitsune Island", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while task.wait(1) do
+        local currentStatus = game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") and '✅️' or '❌️'
+        if currentStatus ~= previousStatus then
+            Kitsunecheck:SetDesc('Status: ' .. currentStatus)
+            previousStatus = currentStatus
+        end
+    end
+end)
+
+CPrehistoriccheck = St:AddParagraph({"Prehistoric Island", "Status: "})
+task.spawn(function()
+    local previousStatus = ""
+    while task.wait(1) do
+        local currentStatus = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") and '✅️' or '❌️'
+        if currentStatus ~= previousStatus then
+            CPrehistoriccheck:SetDesc("Status: " .. currentStatus)
+            previousStatus = currentStatus
+        end
+    end
+end)
+FrozenIsland = St:AddParagraph({"Frozen Dimension", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local currentStatus = game.Workspace._WorldOrigin.Locations:FindFirstChild('Frozen Dimension') and '✅️' or '❌️'
+        if currentStatus ~= previousStatus then
+            FrozenIsland:SetDesc('Status: ' .. currentStatus)
+            previousStatus = currentStatus
+        end
+    end
+end)
