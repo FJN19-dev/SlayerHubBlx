@@ -234,27 +234,11 @@ spawn(function()
                 local mobHum = boss.Humanoid
 
                 repeat
-                    task.wait(0.1)
-                    -- MOVE ACIMA
-                    SafeMove(mobHRP.CFrame * CFrame.new(0,25,0))
+                    task.wait(0.15)
+                    local offset = Vector3.new(math.random(-5,5), 25, math.random(-5,5))
+                    SafeMove(mobHRP.CFrame * CFrame.new(offset))
 
-                    -- BRING (se houver outro boss raro do mesmo nome)
-                    if tick() - LastBring > 1 then
-                        LastBring = tick()
-                        for _,other in pairs(Workspace.Enemies:GetChildren()) do
-                            if other ~= boss
-                            and other.Name == "Jeremy [Lv. 850] [Boss]"
-                            and other:FindFirstChild("HumanoidRootPart")
-                            and other.Humanoid.Health > 0 then
-                                pcall(function()
-                                    other.HumanoidRootPart.CFrame = mobHRP.CFrame
-                                end)
-                            end
-                        end
-                    end
-
-                    -- ATAQUE
-                    if tick() - LastAttack > 0.25 then
+                    if tick() - LastAttack > 0.3 then
                         LastAttack = tick()
                         VirtualUser:CaptureController()
                         VirtualUser:Button1Down(Vector2.new(500,500))
