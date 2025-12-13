@@ -2273,7 +2273,7 @@ end
 
 St:AddSection("Discord")
 
-MainTab:AddDiscordInvite({
+St:AddDiscordInvite({
 	Title = "Slayer | Community",
 	Description = "A community for SLayer Hub Users -- official scripts, updates, and suport in one place.",
 	Banner = "rbxassetid://128134628708017", -- You can put an RGB Color: Color3.fromRGB(233, 37, 69)
