@@ -2277,50 +2277,65 @@ St:AddDiscordInvite({
 
 local Section = St:AddSection({"Server Info"})
 
-local Paragraph = St:AddParagraph({"Time Zone", ""})
-function UpdateOS()
+local TimeZoneParagraph = St:AddParagraph({"Time Zone", ""})
+
+local function UpdateOS()
     local date = os.date("*t")
-    local hour = (date.hour) % 24
+    local hour = date.hour % 24
     local ampm = hour < 12 and "AM" or "PM"
-    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
-    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)    
+    local timezone = string.format(
+        "%02i:%02i:%02i %s",
+        ((hour - 1) % 12) + 1,
+        date.min,
+        date.sec,
+        ampm
+    )
+
+    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
+
     local LocalizationService = game:GetService("LocalizationService")
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
-    local name = player.Name
-    local result, code    
+
+    local code
     if not getgenv().countryRegionCode then
-        result, code = pcall(function()
+        local success, result = pcall(function()
             return LocalizationService:GetCountryRegionForPlayerAsync(player)
         end)
-        if result then
-            getgenv().countryRegionCode = code
-        else
-            getgenv().countryRegionCode = "Unknown"
-        end
+        code = success and result or "Unknown"
+        getgenv().countryRegionCode = code
     else
         code = getgenv().countryRegionCode
     end
-    Time:SetDesc(datetime.." - "..timezone.." [ " .. code .. " ]")
+
+    TimeZoneParagraph:SetDesc(datetime.." - "..timezone.." [ "..code.." ]")
 end
-spawn(function()
+
+task.spawn(function()
     while true do
         UpdateOS()
-        wait(1)
+        task.wait(1)
     end
 end)
 
-local Paragraph = St:AddParagraph({"Time", ""})
-function UpdateTime()
+-- ================= TIME =================
+
+local GameTimeParagraph = St:AddParagraph({"Time", ""})
+
+local function UpdateTime()
     local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
-    local Hour = math.floor(GameTime / (60^2)) % 24
-    local Minute = math.floor(GameTime / (60^1)) % 60
-    local Second = math.floor(GameTime / (60^0)) % 60
-    Timmessss:SetDesc(Hour.." Hour (h) "..Minute.." Minute (m) "..Second.." Second (s) ")
+    local Hour = math.floor(GameTime / 3600) % 24
+    local Minute = math.floor(GameTime / 60) % 60
+    local Second = GameTime % 60
+
+    GameTimeParagraph:SetDesc(
+        Hour.." Hour (h) "..Minute.." Minute (m) "..Second.." Second (s)"
+    )
 end
-spawn(function()
+
+task.spawn(function()
     while true do
         UpdateTime()
-        wait(1)
+        task.wait(1)
     end
 end)
