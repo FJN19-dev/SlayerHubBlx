@@ -172,50 +172,67 @@ spawn(function()
         -- PROGRESS 0 → SWAN PIRATES
         ------------------------------------------------
         if progress == 0 then
-            local QuestGui = LocalPlayer.PlayerGui.Main.Quest
+    local QuestGui = LocalPlayer.PlayerGui.Main.Quest
+    local FoundMob = false
 
-            if QuestGui.Visible and QuestGui.Container.QuestTitle.Title.Text:find("Swan Pirate") then
-                for _,mob in pairs(Workspace.Enemies:GetChildren()) do
-                    if mob.Name == "Swan Pirate [Lv. 775]"
-                    and mob:FindFirstChild("HumanoidRootPart")
-                    and mob.Humanoid.Health > 0 then
+    if QuestGui.Visible and QuestGui.Container.QuestTitle.Title.Text:find("Swan Pirate") then
+        for _,mob in pairs(Workspace.Enemies:GetChildren()) do
+            if mob.Name:find("Swan Pirate")
+            and mob:FindFirstChild("Humanoid")
+            and mob:FindFirstChild("HumanoidRootPart")
+            and mob.Humanoid.Health > 0 then
 
-                        repeat task.wait(0.1)
+                FoundMob = true
 
-                            local mobHRP = mob.HumanoidRootPart
+                repeat task.wait(0.1)
 
-                            -- ACIMA DO MOB
-                            TweenTo(mobHRP.CFrame * CFrame.new(0,25,0))
+                    pcall(function()
+                        sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+                        sethiddenproperty(LocalPlayer, "MaxSimulationRadius", math.huge)
+                    end)
 
-                            -- PUXA OUTROS
-                            for _,other in pairs(Workspace.Enemies:GetChildren()) do
-                                if other.Name == mob.Name
-                                and other ~= mob
-                                and other:FindFirstChild("HumanoidRootPart")
-                                and other.Humanoid.Health > 0 then
-                                    pcall(function()
-                                        other.HumanoidRootPart.CFrame = mobHRP.CFrame
-                                    end)
-                                end
-                            end
+                    local mobHRP = mob.HumanoidRootPart
 
-                            mobHRP.CanCollide = false
-                            mobHRP.Size = Vector3.new(60,60,60)
-                            mobHRP.Transparency = 1
+                    -- FICA ACIMA DO MOB
+                    TweenTo(mobHRP.CFrame * CFrame.new(0, 25, 0))
 
-                            VirtualUser:CaptureController()
-                            VirtualUser:Button1Down(Vector2.new(500,500))
-
-                        until not _G.AutoBartilo
-                        or mob.Humanoid.Health <= 0
-                        or not QuestGui.Visible
+                    -- 🔥 BRING
+                    for _,other in pairs(Workspace.Enemies:GetChildren()) do
+                        if other.Name:find("Swan Pirate")
+                        and other ~= mob
+                        and other:FindFirstChild("HumanoidRootPart")
+                        and other:FindFirstChild("Humanoid")
+                        and other.Humanoid.Health > 0 then
+                            pcall(function()
+                                other.HumanoidRootPart.CFrame = mobHRP.CFrame
+                            end)
+                        end
                     end
-                end
-            else
-                TweenTo(CFrame.new(-456,73,300))
-                task.wait(1)
-                Rep.Remotes.CommF_:InvokeServer("StartQuest","BartiloQuest",1)
+
+                    mobHRP.CanCollide = false
+                    mobHRP.Size = Vector3.new(60,60,60)
+                    mobHRP.Transparency = 1
+
+                    VirtualUser:CaptureController()
+                    VirtualUser:Button1Down(Vector2.new(500,500))
+
+                until not _G.AutoBartilo
+                or mob.Humanoid.Health <= 0
+                or not QuestGui.Visible
             end
+        end
+
+        -- ❗ SE NÃO ACHOU MOB, VAI PRA ÁREA
+        if not FoundMob then
+            TweenTo(CFrame.new(1068.6643, 137.6143, 1322.1061))
+        end
+    else
+        TweenTo(CFrame.new(-456,73,300))
+        task.wait(1)
+        Rep.Remotes.CommF_:InvokeServer("StartQuest","BartiloQuest",1)
+    end
+end
+
 
         ------------------------------------------------
         -- PROGRESS 1 → JEREMY (BOSS)
