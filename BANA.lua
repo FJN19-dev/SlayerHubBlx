@@ -2390,3 +2390,129 @@ spawn(function()
         end
     end
 end)
+
+MobCakePrince= St:AddParagraph({"Dimension Killed", ""})
+spawn(function()
+    while wait(1) do
+        local cakePrince = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner")
+        local killStatus = "Cake Prince: ✅️"
+        if string.len(cakePrince) >= 86 then
+            local killCount = string.sub(cakePrince, 39, 41)
+            killStatus = "Kill: " .. killCount
+        end
+        MobCakePrince:SetDesc(killStatus)
+    end
+end)
+
+CheckRip = St:AddParagraph({"Rip_Indra", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local currentStatus = game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form") or game:GetService("Workspace").Enemies:FindFirstChild("rip_indra") and '✅️' or '❌️'
+        if currentStatus ~= previousStatus then
+            CheckRip:SetDesc("Status: " .. currentStatus)
+            previousStatus = currentStatus
+        end
+    end
+end)
+
+CheckDoughKing = St:AddParagraph({"Dough King", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local currentStatus = game:GetService("ReplicatedStorage"):FindFirstChild("Dough King") or game:GetService("Workspace").Enemies:FindFirstChild("Dough King") and '✅️' or '❌️'
+        if currentStatus ~= previousStatus then
+            CheckDoughKing:SetDesc("Status: " .. currentStatus)
+            previousStatus = currentStatus
+        end
+    end
+end)
+
+EliteHunter = St:AddParagraph({"Elite Hunter", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local currentStatus = (game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or game:GetService("ReplicatedStorage"):FindFirstChild("Urban") or game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or game:GetService("Workspace").Enemies:FindFirstChild("Urban")) and '✅️' or '❌️'
+        local progress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter","Progress")
+        if currentStatus ~= previousStatus then
+            EliteHunter:SetDesc("Status: " .. currentStatus .. " | Killed: " .. progress)
+            previousStatus = currentStatus
+        end
+    end
+end)
+
+FM = St:AddParagraph({"Full Moon", ""})
+task.spawn(function()
+    while task.wait(1) do
+        local moonTextureId = game:GetService("Lighting").Sky.MoonTextureId
+        local moonStatus = "Moon: 0/5"
+        if moonTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+            moonStatus = "Moon: 5/5"
+        elseif moonTextureId == "http://www.roblox.com/asset/?id=9709149052" then
+            moonStatus = "Moon: 4/5"
+        elseif moonTextureId == "http://www.roblox.com/asset/?id=9709143733" then
+            moonStatus = "Moon: 3/5"
+        elseif moonTextureId == "http://www.roblox.com/asset/?id=9709150401" then
+            moonStatus = "Moon: 2/5"
+        elseif moonTextureId == "http://www.roblox.com/asset/?id=9709149680" then
+            moonStatus = "Moon: 1/5"
+        end
+        FM:SetDesc(moonStatus)
+    end
+end)
+
+LegendarySword = St:AddParagraph({"Legendary Sword", "Status: "})
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local swordStatus = "Not Found Legend Swords"
+        if game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LegendarySwordDealer", "1") then
+            swordStatus = "Shisui"
+        elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LegendarySwordDealer", "2") then
+            swordStatus = "Wando"
+        elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LegendarySwordDealer", "3") then
+            swordStatus = "Saddi"
+        end
+        LegendarySword:SetDesc(swordStatus)
+    end
+end)
+
+StatusBone = St:AddParagraph({"Bone", ""})
+spawn(function()
+    while wait(1) do
+        StatusBone:SetDesc("You Have: " .. tostring(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Bones", "Check")) .. " Bones")
+    end
+end)
+
+Dropdown = Main:AddDropdown({
+  Name = "Selecionar Armas",
+  Description = "Select the <font color='rgb(88, 101, 242)'>Number</font>",
+  Options = {"Melee","Sword","Blox Fruit"},
+  Default = "Melee",
+  Flag = "",
+  Callback = function(Value)
+     getgenv().SelectWeapon = value
+  end
+})
+
+task.spawn(function()
+    local lastWeapon = nil
+    while task.wait(0.5) do
+        pcall(function()
+            if getgenv().SelectWeapon == lastWeapon then
+                return
+            end
+            lastWeapon = getgenv().SelectWeapon
+            local weaponFound = nil
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.ToolTip == getgenv().SelectWeapon then
+                    weaponFound = v.Name
+                    break
+                end
+            end
+            if weaponFound then
+                getgenv().SelectWeapon = weaponFound
+            end
+        end)
+    end
+end)
