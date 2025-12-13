@@ -91,186 +91,160 @@ SelectWeapon:OnChanged(function(value)
     _G.SelectWeapon = value
 end)
 
-local ToggleBartilo = Tabs.Quest:AddToggle("AutoBartilo", {
-    Title = "Auto Quest Bartilo",
-    Default = false
-})
+_G.AutoBartilo = false
 
-ToggleBartilo:OnChanged(function(Value)
-    _G.AutoBartilo = Value
+Tabs.Quest:AddToggle("AutoBartilo", {
+    Title = "Auto Bartilo Quest",
+    Default = false
+}):OnChanged(function(v)
+    _G.AutoBartilo = v
 end)
 
 spawn(function()
 
-    -- ===== SERVICES =====
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
     local Rep = game:GetService("ReplicatedStorage")
-    local VirtualUser = game:GetService("VirtualUser")
     local Workspace = game:GetService("Workspace")
     local TweenService = game:GetService("TweenService")
+    local VirtualUser = game:GetService("VirtualUser")
 
-    -- ===== CONFIG =====
-    local HEIGHT_ABOVE_MOB = 25
-    local HITBOX_SIZE = Vector3.new(60,60,60)
+    local CurrentTween
 
-    -- ===== FUNÇÕES BÁSICAS =====
-    function AutoHaki()
-        pcall(function()
-            if not LocalPlayer.Character:FindFirstChild("HasBuso") then
-                Rep.Remotes.CommF_:InvokeServer("Buso")
-            end
-        end)
-    end
+    ------------------------------------------------
+    -- FUNÇÕES BÁSICAS (NÃO QUEBRAM SE NÃO EXISTIR)
+    ------------------------------------------------
+    function EquipWeapon() end
+    function AutoHaki() end
 
-    function EquipWeapon(weapon)
-        if not weapon then return end
-        local char = LocalPlayer.Character
-        if not char then return end
-        for _,v in pairs(LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") and v.Name == weapon then
-                char.Humanoid:EquipTool(v)
-            end
-        end
-    end
-
-    -- ===== TWEEN MOVEMENT =====
+    ------------------------------------------------
+    -- TWEEN SEM TRAVAR
+    ------------------------------------------------
     local function TweenTo(cf)
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
 
-        local dist = (hrp.Position - cf.Position).Magnitude
-        local time = math.clamp(dist / 300, 0.15, 1)
+        if CurrentTween then
+            CurrentTween:Cancel()
+        end
 
-        local tween = TweenService:Create(
+        local dist = (hrp.Position - cf.Position).Magnitude
+        local time = math.clamp(dist / 250, 0.15, 0.6)
+
+        CurrentTween = TweenService:Create(
             hrp,
             TweenInfo.new(time, Enum.EasingStyle.Linear),
             {CFrame = cf}
         )
-        tween:Play()
-        tween.Completed:Wait()
+        CurrentTween:Play()
     end
 
-    local function GoTo(pos)
-        if typeof(pos) == "Vector3" then
-            pos = CFrame.new(pos)
-        end
-        repeat task.wait()
-            TweenTo(pos)
-        until not _G.AutoBartilo
-            or (LocalPlayer.Character.HumanoidRootPart.Position - pos.Position).Magnitude <= 10
-    end
-
-    -- ===== QUEST PROGRESS =====
-    local function Progress()
+    ------------------------------------------------
+    -- PROGRESSO DO BARTILO
+    ------------------------------------------------
+    local function BartiloProgress()
         local ok, res = pcall(function()
             return Rep.Remotes.CommF_:InvokeServer("BartiloQuestProgress","Bartilo")
         end)
         return ok and res or 0
     end
 
-    -- ===== LOOP PRINCIPAL =====
-    while task.wait(0.1) do
+    ------------------------------------------------
+    -- LOOP PRINCIPAL
+    ------------------------------------------------
+    while task.wait(0.15) do
         if not _G.AutoBartilo then continue end
 
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
+        local hum = char and char:FindFirstChild("Humanoid")
+        if not hrp or not hum then continue end
+
+        hum.Sit = false
+        hum:ChangeState(Enum.HumanoidStateType.Running)
+
         if LocalPlayer.Data.Level.Value < 800 then continue end
 
-        local progress = Progress()
+        local progress = BartiloProgress()
 
         ------------------------------------------------
         -- PROGRESS 0 → SWAN PIRATES
         ------------------------------------------------
         if progress == 0 then
             local QuestGui = LocalPlayer.PlayerGui.Main.Quest
-            local Title = QuestGui.Container.QuestTitle.Title.Text
 
-            if QuestGui.Visible and Title:find("Swan Pirates") then
+            if QuestGui.Visible and QuestGui.Container.QuestTitle.Title.Text:find("Swan Pirate") then
                 for _,mob in pairs(Workspace.Enemies:GetChildren()) do
                     if mob.Name == "Swan Pirate [Lv. 775]"
-                    and mob:FindFirstChild("Humanoid")
                     and mob:FindFirstChild("HumanoidRootPart")
                     and mob.Humanoid.Health > 0 then
 
-                        repeat task.wait()
-                            EquipWeapon(_G.SelectWeapon)
-                            AutoHaki()
+                        repeat task.wait(0.1)
 
                             local mobHRP = mob.HumanoidRootPart
-                            mobHRP.CanCollide = false
-                            mobHRP.Size = HITBOX_SIZE
-                            mobHRP.Transparency = 1
 
-                            -- 🔥 FICAR ACIMA DO MOB
-                            TweenTo(mobHRP.CFrame * CFrame.new(0, HEIGHT_ABOVE_MOB, 0))
+                            -- ACIMA DO MOB
+                            TweenTo(mobHRP.CFrame * CFrame.new(0,25,0))
 
-                            -- 🔥 PULL / BRING MOBS
+                            -- PUXA OUTROS
                             for _,other in pairs(Workspace.Enemies:GetChildren()) do
-                                if other ~= mob
-                                and other.Name == mob.Name
-                                and other:FindFirstChild("Humanoid")
+                                if other.Name == mob.Name
+                                and other ~= mob
                                 and other:FindFirstChild("HumanoidRootPart")
                                 and other.Humanoid.Health > 0 then
                                     pcall(function()
-                                        other.HumanoidRootPart.CanCollide = false
-                                        other.HumanoidRootPart.Size = HITBOX_SIZE
-                                        other.HumanoidRootPart.Transparency = 1
                                         other.HumanoidRootPart.CFrame = mobHRP.CFrame
                                     end)
                                 end
                             end
 
+                            mobHRP.CanCollide = false
+                            mobHRP.Size = Vector3.new(60,60,60)
+                            mobHRP.Transparency = 1
+
                             VirtualUser:CaptureController()
                             VirtualUser:Button1Down(Vector2.new(500,500))
 
                         until not _G.AutoBartilo
-                            or mob.Humanoid.Health <= 0
-                            or not QuestGui.Visible
+                        or mob.Humanoid.Health <= 0
+                        or not QuestGui.Visible
                     end
                 end
             else
-                GoTo(Vector3.new(-456,73,300))
+                TweenTo(CFrame.new(-456,73,300))
                 task.wait(1)
                 Rep.Remotes.CommF_:InvokeServer("StartQuest","BartiloQuest",1)
             end
 
         ------------------------------------------------
-        -- PROGRESS 1 → JEREMY BOSS
+        -- PROGRESS 1 → JEREMY (BOSS)
         ------------------------------------------------
         elseif progress == 1 then
             local boss = Workspace.Enemies:FindFirstChild("Jeremy [Lv. 850] [Boss]")
 
             if boss and boss:FindFirstChild("HumanoidRootPart") then
-                repeat task.wait()
-                    EquipWeapon(_G.SelectWeapon)
-                    AutoHaki()
+                repeat task.wait(0.1)
 
-                    local hrpBoss = boss.HumanoidRootPart
-                    hrpBoss.CanCollide = false
-                    hrpBoss.Size = HITBOX_SIZE
-                    hrpBoss.Transparency = 1
+                    TweenTo(boss.HumanoidRootPart.CFrame * CFrame.new(0,25,0))
 
-                    TweenTo(hrpBoss.CFrame * CFrame.new(0, HEIGHT_ABOVE_MOB, 0))
+                    boss.HumanoidRootPart.CanCollide = false
+                    boss.HumanoidRootPart.Size = Vector3.new(60,60,60)
+                    boss.HumanoidRootPart.Transparency = 1
 
                     VirtualUser:CaptureController()
                     VirtualUser:Button1Down(Vector2.new(500,500))
 
                 until not _G.AutoBartilo or boss.Humanoid.Health <= 0
             else
-                GoTo(Vector3.new(-456,73,300))
-                Rep.Remotes.CommF_:InvokeServer("BartiloQuestProgress","Bartilo")
-                task.wait(1)
-                GoTo(Vector3.new(2099,448,649))
+                TweenTo(CFrame.new(2099,448,649))
             end
 
         ------------------------------------------------
         -- PROGRESS 2 → LABIRINTO
         ------------------------------------------------
         elseif progress == 2 then
-            local Steps = {
+            local steps = {
                 Vector3.new(-1850,13,1750),
                 Vector3.new(-1858,19,1712),
                 Vector3.new(-1803,16,1750),
@@ -281,9 +255,9 @@ spawn(function()
                 Vector3.new(-1813,14,1724)
             }
 
-            for _,pos in ipairs(Steps) do
-                GoTo(pos)
-                task.wait(0.8)
+            for _,pos in ipairs(steps) do
+                TweenTo(CFrame.new(pos))
+                task.wait(1)
             end
         end
     end
