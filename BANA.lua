@@ -1,3 +1,96 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Slayer Hub|Beta",
+    SubTitle = "by FJN,Lorenzo",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Amethyst",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    St = Window:AddTab({ Title = "Status", Icon = "user-cog" }),
+    Main = Window:AddTab({ Title = "Main", Icon = "armchair" }),
+    Sub = Window:AddTab({ Title = "Sub Farm", Icon = "swords" }),
+    Quest = Window:AddTab({ Title = "Quest/Items", Icon = "scroll" }),
+    Fish = Window:AddTab({ Title = "Pesca", Icon = "carrot" }),
+    Players = Window:AddTab({ Title = "Players/ESP", Icon = "user" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "wand" }),
+    Sea = Window:AddTab({ Title = "Sea Event", Icon = "waves" }),
+    Other = Window:AddTab({ Title = "Draco", Icon = "" }),
+    Fruit = Window:AddTab({ Title = "Fruit/Raid", Icon = "cherry" }),
+    Race = Window:AddTab({ Title = "Race", Icon = "chevrons-right" }),
+    Shop = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "list-plus" }),
+    Settings = Window:AddTab({ Title = "Setting", Icon = "settings" })
+}
+
+local TweenService = game:GetService("TweenService")
+
+function topos(cf)
+    pcall(function()
+        local Char = game.Players.LocalPlayer.Character
+        local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
+        if not HRP then return end
+
+        local distance = (HRP.Position - cf.Position).Magnitude
+        local speed = math.clamp(distance / 300, 0.1, 1)
+
+        local tweenInfo = TweenInfo.new(
+            speed,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out
+        )
+
+        local tween = TweenService:Create(HRP, tweenInfo, {CFrame = cf})
+        tween:Play()
+        tween.Completed:Wait()
+    end)
+end
+
+
+
+function AutoHaki()
+    if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+        local args = {
+            [1] = "Buso"
+        }
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+    end
+end
+
+function EquipWeapon(weapon)
+    local char = game.Players.LocalPlayer.Character
+    if not char then return end
+
+    for _,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if v.Name == weapon then
+            char.Humanoid:EquipTool(v)
+        end
+    end
+end
+
+local weaponList = {}
+
+for _,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+    if v:IsA("Tool") then
+        table.insert(weaponList, v.Name)
+    end
+end
+
+local SelectWeapon = Tabs.Main:AddDropdown("SelectWeapon", {
+    Title = "Selecionar Arma",
+    Values = weaponList,
+    Multi = false,
+    Default = weaponList[1]
+})
+
+SelectWeapon:OnChanged(function(value)
+    _G.SelectWeapon = value
+end)
+
 _G.AutoBartilo = false
 
 Tabs.Quest:AddToggle("AutoBartilo", {
@@ -179,3 +272,4 @@ spawn(function()
         end
     end
 end)
+
