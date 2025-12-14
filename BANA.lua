@@ -3582,7 +3582,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- TOGGLE
-Tabs.Main:AddToggle("ESPPlayers", {
+Tabs.Players:AddToggle("ESPPlayers", {
     Title = "ESP Players",
     Default = false
 }):OnChanged(function(v)
