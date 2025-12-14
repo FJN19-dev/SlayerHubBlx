@@ -3823,12 +3823,12 @@ spawn(function()
     end
 end)
 
-if Third_Sea then
-
+-- SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
+-- VARIÁVEIS
 _G.AutoBone = false
 getgenv().AutoBoneTween = nil
 
@@ -3848,10 +3848,8 @@ ToggleBone:OnChanged(function(Value)
     end
 end)
 
-Options.ToggleBone:SetValue(false)
-
 ------------------------------------------------
--- TWEEN (speed 100)
+-- TWEEN SPEED 100
 ------------------------------------------------
 local function StopTween()
     if getgenv().AutoBoneTween then
@@ -3860,13 +3858,15 @@ local function StopTween()
     end
 end
 
-local function TweenTo(cf, speed)
+local function TweenTo(cf)
     local char = Player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
     local dist = (hrp.Position - cf.Position).Magnitude
-    local time = dist / speed
+    local time = dist / 100 -- SPEED 100
 
     StopTween()
 
@@ -3881,14 +3881,14 @@ local function TweenTo(cf, speed)
 end
 
 ------------------------------------------------
--- NOCLIP
+-- NOCLIP REAL
 ------------------------------------------------
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.1) do
         if _G.AutoBone then
             local char = Player.Character
             if char then
-                for _,v in pairs(char:GetDescendants()) do
+                for _,v in ipairs(char:GetDescendants()) do
                     if v:IsA("BasePart") then
                         v.CanCollide = false
                     end
@@ -3899,54 +3899,52 @@ task.spawn(function()
 end)
 
 ------------------------------------------------
--- FARM SEM QUEST
+-- FARM
 ------------------------------------------------
 task.spawn(function()
-    while task.wait() do
-        if _G.AutoBone then
-            pcall(function()
-                for _,v in pairs(workspace.Enemies:GetChildren()) do
-                    if _G.AutoBone
-                    and v:FindFirstChild("HumanoidRootPart")
-                    and v:FindFirstChild("Humanoid")
-                    and v.Humanoid.Health > 0
-                    and (
-                        v.Name == "Reborn Skeleton"
-                        or v.Name == "Living Zombie"
-                        or v.Name == "Demonic Soul"
-                        or v.Name == "Posessed Mummy"
-                    ) then
+    while task.wait(0.3) do
+        if not _G.AutoBone then continue end
 
-                        repeat task.wait()
+        for _,v in ipairs(workspace.Enemies:GetChildren()) do
+            if not _G.AutoBone then break end
 
-                            AutoHaki()
-                            bringmob = true
-                            EquipTool(SelectWeapon)
+            if v:FindFirstChild("HumanoidRootPart")
+            and v:FindFirstChild("Humanoid")
+            and v.Humanoid.Health > 0
+            and (
+                v.Name == "Reborn Skeleton"
+                or v.Name == "Living Zombie"
+                or v.Name == "Demonic Soul"
+                or v.Name == "Posessed Mummy"
+            ) then
 
-                            -- 20 STUDS ACIMA DO MOB
-                            local farmCF = v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0)
-                            TweenTo(farmCF, 100)
+                repeat
+                    task.wait()
 
-                            v.HumanoidRootPart.Size = Vector3.new(1,1,1)
-                            v.HumanoidRootPart.Transparency = 1
-                            v.HumanoidRootPart.CanCollide = false
-                            v.Humanoid.WalkSpeed = 0
-                            v.Humanoid.JumpPower = 0
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    bringmob = true
 
-                            FarmPos = farmCF
-                            MonFarm = v.Name
+                    -- 20 STUDS ACIMA
+                    TweenTo(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
 
-                        until not _G.AutoBone
-                        or not v.Parent
-                        or v.Humanoid.Health <= 0
-                    end
-                end
-            end)
+                    v.HumanoidRootPart.CanCollide = false
+                    v.HumanoidRootPart.Size = Vector3.new(1,1,1)
+                    v.HumanoidRootPart.Transparency = 1
+                    v.Humanoid.WalkSpeed = 0
+                    v.Humanoid.JumpPower = 0
+
+                    FarmPos = v.HumanoidRootPart.CFrame
+                    MonFarm = v.Name
+
+                until not _G.AutoBone
+                or not v.Parent
+                or v.Humanoid.Health <= 0
+            end
         end
     end
 end)
 
-end
 
 
 local Katakuri = Tabs.Sub:AddSection("Katakuri")
@@ -7579,3 +7577,4 @@ task.spawn(function()
         end
     end
 end)
+
