@@ -3487,203 +3487,112 @@ Toggle:OnChanged(function(state)
     end
 end)
 
-function UpdateDevilChams() 
-	for i, v in pairs(game.Workspace:GetChildren()) do
-		pcall(function()
-			if DevilFruitESP then
+-- ===== ESP PLAYER BLOX FRUITS =====
 
-				if string.find(v.Name, "Fruit") and v:FindFirstChild("Handle") then   
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LP = Players.LocalPlayer
 
-					local dist = round((game.Players.LocalPlayer.Character.Head.Position - v.Handle.Position).Magnitude / 3)
-					local textFormat = "<" .. v.Name .. "> | " .. tostring(dist) .. "m"
+local ESPPlayersEnabled = false
+local ESPFolder = Instance.new("Folder", workspace)
+ESPFolder.Name = "ESP_PLAYERS"
 
-					if not v.Handle:FindFirstChild("NameEsp"..Number) then
-
-						local bill = Instance.new("BillboardGui")
-						bill.Name = "NameEsp"..Number
-						bill.Parent = v.Handle
-						bill.AlwaysOnTop = true
-						bill.Size = UDim2.new(0, 150, 0, 40)
-						bill.StudsOffset = Vector3.new(0, 2, 0)
-						bill.Adornee = v.Handle
-
-						local name = Instance.new("TextLabel")
-						name.Parent = bill
-						name.BackgroundTransparency = 1
-						name.Size = UDim2.new(1, 0, 1, 0)
-
-						name.Font = Enum.Font.GothamBold
-						name.TextScaled = true
-						
-						-- COR IGUAL AO OUTRO ESP
-						name.TextColor3 = Color3.fromRGB(170, 0, 255)
-						name.TextStrokeTransparency = 0.2
-						
-						name.TextWrapped = true
-						name.Text = textFormat
-
-					else
-						v.Handle["NameEsp"..Number].TextLabel.Text = textFormat
-					end
-
-				end
-
-			else
-				if v:FindFirstChild("Handle") and v.Handle:FindFirstChild("NameEsp"..Number) then
-					v.Handle["NameEsp"..Number]:Destroy()
-				end
-			end
-		end)
-	end
+-- REMOVE TODOS
+local function ClearESPPlayers()
+    for _, v in pairs(ESPFolder:GetChildren()) do
+        v:Destroy()
+    end
 end
 
-local Toggle = Tabs.Players:AddToggle("Esp Fruit", {Title = "Esp Fruta", Default = false})
-Toggle:OnChanged(function(value)
-    DevilFruitESP = value
-    while DevilFruitESP do
-        wait(1)
-        UpdateDevilChams()
-    end
-end)
+-- CRIA ESP
+local function CreatePlayerESP(player)
+    if player == LP then return end
+    if not player.Character then return end
 
-function UpdateBerriesESP()
-    local CollectionService = game:GetService("CollectionService")
-    local BerryBushes = CollectionService:GetTagged("BerryBush")
-    for _, Bush in pairs(BerryBushes) do
-        pcall(function()
-            for AttributeName, Berry in pairs(Bush:GetAttributes()) do
-                if Berry then
-                    if not Bush.Parent:FindFirstChild("BerryESP") then
-                        local bill = Instance.new("BillboardGui", Bush.Parent)
-                        bill.Name = "BerryESP"
-                        bill.ExtentsOffset = Vector3.new(0, 2, 0)
-                        bill.Size = UDim2.new(1, 200, 1, 30)
-                        bill.Adornee = Bush.Parent
-                        bill.AlwaysOnTop = true
-                        local name = Instance.new("TextLabel", bill)
-                        name.Font = Enum.Font.GothamSemibold
-                        name.TextSize = 14
-                        name.TextWrapped = true
-                        name.Size = UDim2.new(1, 0, 1, 0)
-                        name.TextYAlignment = Enum.TextYAlignment.Top
-                        name.BackgroundTransparency = 1
-                        name.TextStrokeTransparency = 0.5
-                        name.TextColor3 = Color3.fromRGB(255, 255, 0)
-                        name.Text = Berry 
-                    end
-                    if Bush.Parent:FindFirstChild("BerryESP") then
-                        local Player = game.Players.LocalPlayer
-                        if Player and Player.Character and Player.Character:FindFirstChild("Head") then
-                            local Position = Player.Character.Head.Position
-                            local Magnitude = (Bush.Parent:GetPivot().Position - Position).Magnitude
-                            Bush.Parent.BerryESP.TextLabel.Text = Berry .. "\n" .. math.floor(Magnitude) .. "m"
-                        end
-                    end
-                else
-                    if Bush.Parent:FindFirstChild("NameEsp") then
-                        Bush.Parent:FindFirstChild("NameEsp"):Destroy()
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if ESPFolder:FindFirstChild(player.Name) then
+        return ESPFolder[player.Name]
+    end
+
+    local gui = Instance.new("BillboardGui")
+    gui.Name = player.Name
+    gui.Parent = ESPFolder
+    gui.Adornee = hrp
+    gui.Size = UDim2.new(14, 0, 5, 0) -- BEM GRANDE
+    gui.AlwaysOnTop = true
+    gui.MaxDistance = 25000
+
+    -- FOTO
+    local img = Instance.new("ImageLabel", gui)
+    img.Size = UDim2.new(0.3, 0, 1, 0)
+    img.BackgroundTransparency = 1
+
+    local ok, thumb = pcall(function()
+        return Players:GetUserThumbnailAsync(
+            player.UserId,
+            Enum.ThumbnailType.HeadShot,
+            Enum.ThumbnailSize.Size420x420
+        )
+    end)
+    if ok then img.Image = thumb end
+
+    -- TEXTO
+    local txt = Instance.new("TextLabel", gui)
+    txt.Size = UDim2.new(0.7, 0, 1, 0)
+    txt.Position = UDim2.new(0.3, 0, 0, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = true
+    txt.Font = Enum.Font.GothamBold
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+    txt.TextStrokeTransparency = 0
+    txt.TextColor3 = Color3.fromRGB(170, 0, 255)
+    txt.Text = player.Name .. " | 0m"
+
+    return gui, txt
+end
+
+-- LOOP DE UPDATE
+RunService.RenderStepped:Connect(function()
+    if not ESPPlayersEnabled then return end
+    if not LP.Character then return end
+
+    local myHRP = LP.Character:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LP and plr.Character then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local gui, txt = CreatePlayerESP(plr)
+                if gui and txt then
+                    local dist = math.floor((hrp.Position - myHRP.Position).Magnitude)
+                    txt.Text = plr.Name .. " | " .. dist .. "m"
+
+                    if dist >= 5000 then
+                        txt.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    else
+                        txt.TextColor3 = Color3.fromRGB(170, 0, 255)
                     end
                 end
             end
-        end)
-    end
-end
-
-Toggle = Tabs.Players:AddToggle("Toggle", {Title = "Esp Berry", Default = false })
-Toggle:OnChanged(function(Value)
-    Berry = value
-    while Berry do
-        wait(1)
-        UpdateBerriesESP()
-    end
-end)
-
-function UpdateIslandKisuneESP() 
-        for i,v in pairs(game:GetService("Workspace")["_WorldOrigin"].Locations:GetChildren()) do
-            pcall(function()
-                if KitsuneIslandEsp then 
-                    if v.Name == "Kitsune Island" then
-                        if not v:FindFirstChild('NameEsp') then
-                            local bill = Instance.new('BillboardGui',v)
-                            bill.Name = 'NameEsp'
-                            bill.ExtentsOffset = Vector3.new(0, 1, 0)
-                            bill.Size = UDim2.new(1,200,1,30)
-                            bill.Adornee = v
-                            bill.AlwaysOnTop = true
-                            local name = Instance.new('TextLabel',bill)
-                            name.Font = "Code"
-                            name.FontSize = "Size14"
-                            name.TextWrapped = true
-                            name.Size = UDim2.new(1,0,1,0)
-                            name.TextYAlignment = 'Top'
-                            name.BackgroundTransparency = 1
-                            name.TextStrokeTransparency = 0.5
-                            name.TextColor3 = Color3.fromRGB(80, 245, 245)
-                        else
-                            v['NameEsp'].TextLabel.Text = (v.Name ..'   \n'.. round((game:GetService('Players').LocalPlayer.Character.Head.Position - v.Position).Magnitude/3) ..' M')
-                        end
-                    end
-                else
-                    if v:FindFirstChild('NameEsp') then
-                        v:FindFirstChild('NameEsp'):Destroy()
-                    end
-                end
-            end)
         end
     end
+end)
 
-
-Toggle = Tabs.Players:AddToggle("Toggle", {Title = "Esp Kitsune Island", Default = false })
-Toggle:OnChanged(function(Value)
-    KitsuneIslandEsp = value
-    while KitsuneIslandEsp do
-        wait(1)
-        UpdateIslandKisuneESP()
+-- TOGGLE
+Tabs.Main:AddToggle("ESPPlayers", {
+    Title = "ESP Players",
+    Default = false
+}):OnChanged(function(v)
+    ESPPlayersEnabled = v
+    if not v then
+        ClearESPPlayers()
     end
 end)
 
-function UpdatePrehistoricIslandESP() 
-    for i,v in pairs(game:GetService("Workspace")["_WorldOrigin"].Locations:GetChildren()) do
-        pcall(function()
-            if PrehistoricIslandESP then 
-                if v.Name == "PrehistoricIsland" then
-                    if not v:FindFirstChild('NameEsp') then
-                        local bill = Instance.new('BillboardGui',v)
-                        bill.Name = 'NameEsp'
-                        bill.ExtentsOffset = Vector3.new(0, 1, 0)
-                        bill.Size = UDim2.new(1,200,1,30)
-                        bill.Adornee = v
-                        bill.AlwaysOnTop = true
-                        local name = Instance.new('TextLabel',bill)
-                        name.Font = "Code"
-                        name.FontSize = "Size14"
-                        name.TextWrapped = true
-                        name.Size = UDim2.new(1,0,1,0)
-                        name.TextYAlignment = 'Top'
-                        name.BackgroundTransparency = 1
-                        name.TextStrokeTransparency = 0.5
-                        name.TextColor3 = Color3.fromRGB(80, 245, 245)
-                    else
-                        v['NameEsp'].TextLabel.Text = (v.Name ..'   \n'.. round((game:GetService('Players').LocalPlayer.Character.Head.Position - v.Position).Magnitude/3) ..' M')
-                    end
-                end
-            else
-                if v:FindFirstChild('NameEsp') then
-                    v:FindFirstChild('NameEsp'):Destroy()
-                end
-            end
-        end)
-    end
-end
 
-Toggle = Tabs.Players:AddToggle("Toggle", {Title = "Esp Phehistoric", Default = false })
-Toggle:OnChanged(function(Value)
-    PrehistoricIslandESP = value
-    while PrehistoricIslandESP do
-        wait(1)
-        UpdatePrehistoricIslandESP()
-    end
-end)
 -----Sub-----
 
 Toggle = Tabs.Sub:AddToggle("Toggle", {Title = "Auto Factory", Default = false })
