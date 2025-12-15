@@ -2526,3 +2526,51 @@ Shop:AddButton({
         end
     end
 })
+
+Shop:AddButton({"Black Leg", function()
+
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    local Player = Players.LocalPlayer
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+    local CommF_Remote = Remotes:WaitForChild("CommF_")
+
+    -- CFrame do Black Leg por Sea
+    local BlackLegCFrame
+
+    if Sea1 then
+        BlackLegCFrame = CFrame.new(-987.5, 13.8, 3965.8) -- SEA 1
+    elseif Sea2 then
+        BlackLegCFrame = CFrame.new(-8712.2, 142.2, -13568.9) -- SEA 2
+    elseif Sea3 then
+        BlackLegCFrame = CFrame.new(
+            -5041.89258, 371.348022, -3176.3645,
+            0.635458767, -6.51252137e-08, 0.772134781,
+            -4.38871055e-08, 1, 1.20462985e-07,
+            -0.772134781, -1.10436019e-07, 0.635458767
+        ) -- SEA 3
+    end
+
+    local char = Player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp or not BlackLegCFrame then return end
+
+    -- salva posição atual
+    local oldCFrame = hrp.CFrame
+
+    -- TP até o Black Leg
+    hrp.CFrame = BlackLegCFrame
+    task.wait(0.5)
+
+    -- compra
+    pcall(function()
+        CommF_Remote:InvokeServer("BuyBlackLeg")
+    end)
+
+    task.wait(0.5)
+
+    -- volta para a posição original
+    hrp.CFrame = oldCFrame
+
+end})
