@@ -3568,6 +3568,44 @@ Toggle1:Callback(function(Value)
     getgenv().SkillF = Value
 end)
 
+------Sub-------
+
+if Sea2 then
+local Toggle1 = Sub:AddToggle({
+   Name = "Auto Factory",
+   Description = "",
+   Default = false 
+})  
+Toggle1:Callback(function(Value)
+    getgenv().AutoFactory = Value
+    StopTween(getgenv().AutoFactory)
+end)
+task.spawn(function()
+    while task.wait(0.1) do
+        -- só continua se AutoFactory estiver ativo e World2 existir
+        if getgenv().AutoFactory and World2 then
+            local enemies = game:GetService("Workspace").Enemies
+            local coreEnemy = enemies:FindFirstChild("Core")
+            
+            if coreEnemy and coreEnemy:FindFirstChild("Humanoid") and coreEnemy.Humanoid.Health > 0 then
+                repeat
+                    task.wait(0.1)
+                    AutoHaki()  -- ativa Haki
+                    EquipWeapon(getgenv().SelectWeapon)  -- equipa a arma
+                    -- teleporta até o inimigo, só se o HumanoidRootPart existir
+                    if coreEnemy:FindFirstChild("HumanoidRootPart") then
+                        topos(coreEnemy.HumanoidRootPart.CFrame)
+                    end
+                until not coreEnemy or coreEnemy.Humanoid.Health <= 0 or not getgenv().AutoFactory
+            else
+                -- se não houver inimigo, vai para a posição padrão
+                topos(CFrame.new(448.46756, 199.356781, -441.389252))
+            end
+        end
+    end
+end)
+
+-------Playerstab---
 
 -- Monta a lista de players
 local Playerslist = {}
