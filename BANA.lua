@@ -3568,6 +3568,88 @@ Toggle1:Callback(function(Value)
     getgenv().SkillF = Value
 end)
 
+-- ================================
+-- SERVICES
+-- ================================
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local LP = Players.LocalPlayer
+
+-- ================================
+-- CONFIG
+-- ================================
+getgenv().AimbotSkill = false
+getgenv().AimPart = "HumanoidRootPart"
+getgenv().AimDistance = 1500
+
+-- ================================
+-- TOGGLE
+-- ================================
+local Toggle = PlayersTab:AddToggle({
+    Name = "Aimbot Skill (Players)",
+    Description = "Skill vai no player mais próximo (SEM mover câmera)",
+    Default = false
+})
+
+Toggle:Callback(function(v)
+    getgenv().AimbotSkill = v
+end)
+
+-- ================================
+-- FUNÇÃO: PLAYER MAIS PRÓXIMO
+-- ================================
+local function GetClosestPlayer()
+    if not LP.Character or not LP.Character:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+
+    local myHRP = LP.Character.HumanoidRootPart
+    local closest, shortest = nil, math.huge
+
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LP
+        and plr.Team ~= LP.Team
+        and plr.Character
+        and plr.Character:FindFirstChild(getgenv().AimPart)
+        and plr.Character:FindFirstChild("Humanoid")
+        and plr.Character.Humanoid.Health > 0 then
+
+            local part = plr.Character[getgenv().AimPart]
+            local dist = (part.Position - myHRP.Position).Magnitude
+
+            if dist < shortest and dist <= getgenv().AimDistance then
+                shortest = dist
+                closest = part
+            end
+        end
+    end
+
+    return closest
+end
+
+-- ================================
+-- AIMBOT APENAS NA SKILL
+-- ================================
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if not getgenv().AimbotSkill then return end
+
+    if table.find({
+        Enum.KeyCode.Z,
+        Enum.KeyCode.X,
+        Enum.KeyCode.C,
+        Enum.KeyCode.V,
+        Enum.KeyCode.F
+    }, input.KeyCode) then
+
+        local target = GetClosestPlayer()
+        if target then
+            MousePos = target.Position
+        end
+    end
+end)
+
 
 -- ================================
 -- SERVICES
