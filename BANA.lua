@@ -328,21 +328,25 @@ Window:AddMinimizeButton({
     local Misc = Window:MakeTab({ "Misc", "list-plus" })
     local Settings = Window:MakeTab({ "Setting", "settings" })
     
-local id = game.PlaceId
-if id == 2753915549 then World1 = true; elseif id == 4442272183 then World2 = true; elseif id == 7449423635 then World3 = true; else game:Shutdown() end;
-
-
-First_Sea = false
-Second_Sea = false
-Third_Sea = false
+-- =========================
+-- DETECTA SEA
+-- =========================
 local placeId = game.PlaceId
+local First_Sea = false
+local Second_Sea = false
+local Third_Sea = false
+
 if placeId == 2753915549 then
-First_Sea = true
+    First_Sea = true
 elseif placeId == 4442272183 then
-Second_Sea = true
+    Second_Sea = true
 elseif placeId == 7449423635 then
-Third_Sea = true
+    Third_Sea = true
+else
+    game:Shutdown()
 end
+
+
 
 if not game:IsLoaded() then
     game.Loaded:Wait()
@@ -2809,6 +2813,90 @@ Toggle1:Callback(function(Value)
     StopTween(getgenv().AutoFarm)
 end)
 
+local Toggle1 = Main:AddToggle({
+  Name = "Auto Level",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoFarm = Value
+    StopTween(getgenv().AutoFarm)
+end)
+
+
+spawn(function()
+    while task.wait(0.5) do
+        if getgenv().AutoFarm then
+            pcall(function()
+                
+                CheckQuest()
+
+                local player = game:GetService("Players").LocalPlayer
+                local humanoidRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+                if not humanoidRoot then return end
+                
+                local questGui = player.PlayerGui.Main.Quest
+                local questVisible = questGui.Visible
+                local questTitle = questGui.Container.QuestTitle.Title.Text
+                
+                -- Se a quest for diferente → abandona
+                if not string.find(questTitle, NameMon) then
+                    getgenv().StartMagnet = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+                end
+
+                -- Se não tiver quest ativa → inicia
+                if not questVisible then
+                    
+                    getgenv().StartMagnet = false
+                    CheckQuest()
+
+                    local distance = (humanoidRoot.Position - CFrameQuest.Position).Magnitude
+                    
+                    if distance > 1500 then                           -- Teleporte anti-kick
+                        BTP(CFrameQuest * CFrame.new(0, 25, 5))
+                    else
+                        topos(CFrameQuest)                             -- Tp normal
+                    end
+
+                    -- Quando chegar no NPC → inicia quest
+                    if (humanoidRoot.Position - CFrameQuest.Position).Magnitude < 20 then
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
+                    end
+
+                else -- Se já tiver quest → ir matar NPCs
+                    
+                    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                        if mob:FindFirstChild("HumanoidRootPart") and 
+                           mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 and 
+                           mob.Name == Mon then
+            
+                            repeat task.wait(0.1)
+                                AutoHaki()
+                                EquipWeapon(getgenv().SelectWeapon)
+
+                                -- Tp para o mob
+                                topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.Head.CanCollide = false
+                                getgenv().StartMagnet = true
+                                
+                                sethiddenproperty(player, "SimulationRadius", math.huge)
+
+                                ------------------------------------------------
+
+                            until not getgenv().AutoFarm or mob.Humanoid.Health <= 0 or not mob.Parent or not questGui.Visible
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
 
 local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
@@ -3583,41 +3671,46 @@ Toggle1:Callback(function(Value)
 end)
 
 ------Sub-------
-if Second_Sea then
-local Toggle1 = Sub:AddToggle({
-   Name = "Auto Factory",
-   Description = "",
-   Default = false 
-})  
-Toggle1:Callback(function(Value)
-    getgenv().AutoFactory = Value
-    StopTween(getgenv().AutoFactory)
-end)
-task.spawn(function()
-    while task.wait(0.1) do
-        -- só continua se AutoFactory estiver ativo e World2 existir
-        if getgenv().AutoFactory and World2 then
-            local enemies = game:GetService("Workspace").Enemies
-            local coreEnemy = enemies:FindFirstChild("Core")
-            
-            if coreEnemy and coreEnemy:FindFirstChild("Humanoid") and coreEnemy.Humanoid.Health > 0 then
-                repeat
-                    task.wait(0.1)
-                    AutoHaki()  -- ativa Haki
-                    EquipWeapon(getgenv().SelectWeapon)  -- equipa a arma
-                    -- teleporta até o inimigo, só se o HumanoidRootPart existir
-                    if coreEnemy:FindFirstChild("HumanoidRootPart") then
-                        topos(coreEnemy.HumanoidRootPart.CFrame)
-                    end
-                until not coreEnemy or coreEnemy.Humanoid.Health <= 0 or not getgenv().AutoFactory
-            else
-                -- se não houver inimigo, vai para a posição padrão
-                topos(CFrame.new(448.46756, 199.356781, -441.389252))
+
+-- só cria o toggle se estiver no World2
+if World2 then
+    local Toggle1 = Sub:AddToggle({
+        Name = "Auto Factory",
+        Description = "Ativa Auto Factory apenas no Sea 2",
+        Default = false
+    })  
+
+    Toggle1:Callback(function(Value)
+        getgenv().AutoFactory = Value
+        StopTween(getgenv().AutoFactory)
+    end)
+
+    -- loop de execução
+    task.spawn(function()
+        while task.wait(0.1) do
+            if getgenv().AutoFactory then
+                local enemies = game:GetService("Workspace").Enemies
+                local coreEnemy = enemies:FindFirstChild("Core")
+                
+                if coreEnemy and coreEnemy:FindFirstChild("Humanoid") and coreEnemy.Humanoid.Health > 0 then
+                    repeat
+                        task.wait(0.1)
+                        AutoHaki()  
+                        EquipWeapon(getgenv().SelectWeapon)  
+
+                        if coreEnemy:FindFirstChild("HumanoidRootPart") then
+                            topos(coreEnemy.HumanoidRootPart.CFrame)
+                        end
+                    until not coreEnemy or coreEnemy.Humanoid.Health <= 0 or not getgenv().AutoFactory
+                else
+                    topos(CFrame.new(448.46756, 199.356781, -441.389252))
+                end
             end
         end
-    end
-end)
+    end)
+end
 
+if World3 then 
 local Toggle1 = Sub:AddToggle({
   Name = "Auto Raid Pirata",
   Description = "",
@@ -3676,9 +3769,9 @@ task.spawn(function()
         end
     end
 end)
-
+if World3 then 
 local Section = Sub:AddSection({"Elite Hunter"})
-
+if World3 then 
 local Toggle1 = Sub:AddToggle({
     Name = "Auto Elite Hunter",
     Description = "",
@@ -3736,6 +3829,7 @@ Toggle1:Callback(function(Value)
     end
 end)
 
+if World3 then 
 local Toggle1 = Sub:AddToggle({
   Name = "Hop Server Elite Hunter",
   Description = "",
@@ -3792,7 +3886,130 @@ spawn(function()
         end
     end
 end)
+if World3 then 
+local Section = Sub:AddSection({"Ossos"})
+if World3 then 
+local Paragraph = Sub:AddParagraph({"Farma Osso", "Se Você for Farma Osso Vai na aba Main e muda O modo de Farme Pra bone e Start farm"})
 
+
+-- Toggle para AutoFarm Bone (sem dropdown)
+if World3 then  -- só cria o toggle se estiver no Sea 3
+    local ToggleBones = Sub:AddToggle({
+        Name = "Auto Farm Bone",
+        Description = "Ativa o farm de Reborn Skeleton, Living Zombie, Demonic Soul e Posessed Mummy",
+        Default = false
+    })
+
+    ToggleBones:Callback(function(Value)
+        getgenv().AutoFarmBone = Value
+    end)
+
+    -- =========================
+    -- Posições dos inimigos
+    -- =========================
+    local Bone = {
+        ["Reborn Skeleton"] = CFrame.new(-8769.58984, 142.13063, 6055.27637),
+        ["Living Zombie"] = CFrame.new(-10156.4531, 138.652481, 5964.5752),
+        ["Demonic Soul"] = CFrame.new(-9525.17188, 172.13063, 6152.30566),
+        ["Posessed Mummy"] = CFrame.new(-9570.88281, 5.81831884, 6187.86279)
+    }
+
+    local BonePos = CFrame.new(-9506.234375, 172.130615234375, 6117.0771484375)
+
+    -- =========================
+    -- Loop unificado de AutoFarm
+    -- =========================
+    spawn(function()
+        while task.wait(0.1) do
+            if getgenv().AutoFarmBone and World3 then
+                pcall(function()
+                    local enemies = game.Workspace.Enemies:GetChildren()
+                    local foundEnemy = false
+
+                    for _, mob in pairs(enemies) do
+                        if Bone[mob.Name] and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            foundEnemy = true
+
+                            -- Puxar inimigo para você
+                            mob.HumanoidRootPart.CFrame = Bone[mob.Name]
+                            mob.Head.CanCollide = false
+                            mob.Humanoid.Sit = false
+                            mob.Humanoid:ChangeState(11)
+                            task.wait(0.1)
+                            mob.Humanoid:ChangeState(14)
+                            mob.HumanoidRootPart.CanCollide = false
+                            mob.Humanoid.JumpPower = 0
+                            mob.Humanoid.WalkSpeed = 0
+                            local animator = mob.Humanoid:FindFirstChild("Animator")
+                            if animator then animator:Destroy() end
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+
+                            -- Atacar inimigo
+                            repeat
+                                task.wait(0.1)
+                                AutoHaki()
+                                EquipWeapon(getgenv().SelectWeapon)
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.Head.CanCollide = false
+                                getgenv().BonesBring = true
+                                -- Teleporta 20 studs acima do inimigo
+                                topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            until not getgenv().AutoFarmBone or not mob.Parent or mob.Humanoid.Health <= 0
+                        end
+                    end
+
+                    -- Se nenhum inimigo encontrado, vai para posição padrão
+                    if not foundEnemy then
+                        if BypassTP then
+                            local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+                            if (playerPos - BonePos.Position).Magnitude > 1500 then
+                                BTP(BonePos)
+                            else
+                                topos(BonePos)
+                            end
+                        else
+                            topos(BonePos)
+                        end
+
+                        UnEquipWeapon(getgenv().SelectWeapon)
+                        getgenv().BonesBring = false
+                        topos(CFrame.new(-9515, 164, 5786))
+
+                        for _, mob in pairs(game.ReplicatedStorage:GetChildren()) do
+                            if Bone[mob.Name] then
+                                topos(mob.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+end
+
+if World3 then 
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Tente a sorte",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoTryLuck = Value
+    StopTween(getgenv().AutoTryLuck)  
+end)
+spawn(function()
+    while wait(0.5) do
+        if getgenv().AutoTryLuck and World3 then    
+            local targetPos = CFrame.new(-8652.99707, 143.450119, 6170.50879)
+            if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - targetPos.Position).magnitude > 5 then
+                topos(targetPos)
+                wait(0.5)
+            end
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("gravestoneEvent", 2)
+        end
+    end
+end)
 
 -------Playerstab---
 
