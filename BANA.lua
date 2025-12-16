@@ -3568,65 +3568,98 @@ Toggle1:Callback(function(Value)
     getgenv().SkillF = Value
 end)
 
+-- =========================
 -- CONFIG
-getgenv().AimPlayerSkill = false
-getgenv().AimPart = "HumanoidRootPart" -- "Head" ou "HumanoidRootPart"
-getgenv().AimDistance = 1000
+-- =========================
+getgenv().BerryESP = false
 
--- TOGGLE
-local ToggleAimPlayer = Players:AddToggle({
-    Name = "Aimbot Skill (Players)",
-    Description = "",
+-- =========================
+-- TOGGLE (TAB Players)
+-- =========================
+local ToggleBerry = Players:AddToggle({
+    Name = "Berry ESP",
+    Description = "Nome + Distância das <font color='rgb(170,0,255)'>Berries</font>",
     Default = false
 })
 
-ToggleAimPlayer:Callback(function(Value)
-    getgenv().AimPlayerSkill = Value
+ToggleBerry:Callback(function(Value)
+    getgenv().BerryESP = Value
 end)
 
+-- =========================
 -- SERVICES
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
+-- =========================
+local CollectionService = game:GetService("CollectionService")
+local PlayersService = game:GetService("Players")
+local LocalPlayer = PlayersService.LocalPlayer
 
--- FUNÇÃO: pega player mais próximo
-local function GetClosestPlayer()
-    local closestPart = nil
-    local shortestDistance = math.huge
+-- =========================
+-- FUNÇÕES ESP
+-- =========================
+local function CreateBerryESP(bush)
+    if not bush or bush:FindFirstChild("BerryESP") then return end
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
 
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            local part = player.Character:FindFirstChild(getgenv().AimPart)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "BerryESP"
+    billboard.Adornee = bush
+    billboard.Size = UDim2.new(0, 180, 0, 45)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = bush
 
-            if humanoid and humanoid.Health > 0 and part then
-                local distance = (part.Position - Camera.CFrame.Position).Magnitude
-                if distance < shortestDistance and distance <= getgenv().AimDistance then
-                    shortestDistance = distance
-                    closestPart = part
-                end
-            end
-        end
-    end
-
-    return closestPart
+    local text = Instance.new("TextLabel")
+    text.Name = "Label"
+    text.Size = UDim2.new(1, 0, 1, 0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = Color3.fromRGB(170, 0, 255) -- ROXO
+    text.TextStrokeTransparency = 0
+    text.TextScaled = true
+    text.Font = Enum.Font.SourceSansBold
+    text.Parent = billboard
 end
 
--- LOOP DO AIMBOT
-RunService.RenderStepped:Connect(function()
-    if not getgenv().AimPlayerSkill then
-        return
-    end
+local function UpdateBerryESP(bush)
+    if not bush:FindFirstChild("BerryESP") then return end
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
 
-    local target = GetClosestPlayer()
-    if target then
-        Camera.CFrame = CFrame.new(
-            Camera.CFrame.Position,
-            target.Position
-        )
+    local hrp = LocalPlayer.Character.HumanoidRootPart
+    local label = bush.BerryESP:FindFirstChild("Label")
+    if not label then return end
+
+    local distance = (bush.Position - hrp.Position).Magnitude
+    local meters = math.floor(distance)
+
+    local berryName = bush.Name or "Berry"
+    label.Text = berryName .. " | " .. meters .. " M"
+end
+
+local function RemoveBerryESP()
+    for _, bush in pairs(CollectionService:GetTagged("BerryBush")) do
+        if bush:FindFirstChild("BerryESP") then
+            bush.BerryESP:Destroy()
+        end
+    end
+end
+
+-- =========================
+-- LOOP PRINCIPAL
+-- =========================
+task.spawn(function()
+    while task.wait(0.5) do
+        pcall(function()
+            if getgenv().BerryESP then
+                for _, bush in pairs(CollectionService:GetTagged("BerryBush")) do
+                    CreateBerryESP(bush)
+                    UpdateBerryESP(bush)
+                end
+            else
+                RemoveBerryESP()
+            end
+        end)
     end
 end)
+
 
 
 ------shop --------
