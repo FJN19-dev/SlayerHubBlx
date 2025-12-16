@@ -4053,7 +4053,7 @@ end)
 end
 
 if World3 then
-local Katakuri = Tabs.Sub:AddSection("Katakuri")
+local Katakuri = Sub:AddSection("Katakuri")
 end
 
 if World3 then
@@ -4061,7 +4061,7 @@ local Paragraph = Sub:AddParagraph({"Katakuri V1", "Para matar Katakuri V1 Vai E
 end
 
 if World3 then
-local Toggle1 = Tab1:AddToggle({
+local Toggle1 = Sub:AddToggle({
   Name = "Auto Katakuri V2",
   Description = "",
   Default = false 
@@ -4496,6 +4496,8 @@ Toggle1:Callback(function(Value)
         ChestCounter = 0
     end
 end)
+
+
 
 
 -------Playerstab---
