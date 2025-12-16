@@ -3710,67 +3710,76 @@ if World2 then
     end)
 end
 
-if World3 then 
-local Toggle1 = Sub:AddToggle({
-  Name = "Auto Raid Pirata",
-  Description = "",
-  Default = false 
-})
-Toggle1:Callback(function(Value)
-    getgenv().AutoPirateRaid = Value
-    StopTween(getgenv().AutoPirateRaid)
-end)
 
-task.spawn(function()
-    while task.wait(0.1) do
-        -- só executa se AutoPirateRaid estiver ativo e World3 existir
-        if getgenv().AutoPirateRaid and World3 then
-            pcall(function()
-                local CFrameBoss = CFrame.new(-5496.17432, 313.768921, -2841.53027)
-                local player = game.Players.LocalPlayer
-                local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")            
-                if not humanoidRootPart then return end
+-- Auto Raid Pirata (somente Sea 3)
+if World3 then
+    local Toggle1 = Sub:AddToggle({
+        Name = "Auto Raid Pirata",
+        Description = "",
+        Default = false 
+    })
 
-                local distanceToBoss = (CFrame.new(-5539.311, 313.801, -2972.372).Position - humanoidRootPart.Position).Magnitude
+    Toggle1:Callback(function(Value)
+        getgenv().AutoPirateRaid = Value
+        StopTween(getgenv().AutoPirateRaid)
+    end)
 
-                if distanceToBoss <= 500 then
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if getgenv().AutoPirateRaid and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                            local enemyDistance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
-                            if enemyDistance < 2000 then
-                                repeat 
-                                    task.wait(0.1)
-                                    AutoHaki()
-                                    EquipWeapon(getgenv().SelectWeapon)
-                                    if enemy:FindFirstChild("HumanoidRootPart") then
-                                        enemy.HumanoidRootPart.CanCollide = false
-                                        topos(enemy.HumanoidRootPart.CFrame * Pos)
-                                    end
-                                    getgenv().StartMagnet = true
-                                until not enemy.Parent or enemy.Humanoid.Health <= 0 or not getgenv().AutoPirateRaid
+    task.spawn(function()
+        while task.wait(0.1) do
+            -- só executa se AutoPirateRaid estiver ativo e World3 existir
+            if getgenv().AutoPirateRaid and World3 then
+                pcall(function()
+                    local CFrameBoss = CFrame.new(-5496.17432, 313.768921, -2841.53027)
+                    local player = game.Players.LocalPlayer
+                    local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")            
+                    if not humanoidRootPart then return end
+
+                    local distanceToBoss = (CFrame.new(-5539.311, 313.801, -2972.372).Position - humanoidRootPart.Position).Magnitude
+
+                    if distanceToBoss <= 500 then
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if getgenv().AutoPirateRaid and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                                local enemyDistance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+                                if enemyDistance < 2000 then
+                                    repeat 
+                                        task.wait(0.1)
+                                        AutoHaki()
+                                        EquipWeapon(getgenv().SelectWeapon)
+                                        if enemy:FindFirstChild("HumanoidRootPart") then
+                                            enemy.HumanoidRootPart.CanCollide = false
+                                            -- Teleporta 20 studs acima do inimigo
+                                            topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                        end
+                                        getgenv().StartMagnet = true
+                                    until not enemy.Parent or enemy.Humanoid.Health <= 0 or not getgenv().AutoPirateRaid
+                                end
                             end
                         end
-                    end
-                else
-                    UnEquipWeapon(getgenv().SelectWeapon)
+                    else
+                        UnEquipWeapon(getgenv().SelectWeapon)
 
-                    if BypassTP then
-                        local distanceToCFrameBoss = (humanoidRootPart.Position - CFrameBoss.Position).Magnitude
-                        if distanceToCFrameBoss > 1500 then
-                            BTP(CFrameBoss)
-                        else
-                            topos(CFrameBoss)
+                        if BypassTP then
+                            local distanceToCFrameBoss = (humanoidRootPart.Position - CFrameBoss.Position).Magnitude
+                            if distanceToCFrameBoss > 1500 then
+                                BTP(CFrameBoss)
+                            else
+                                topos(CFrameBoss)
+                            end
                         end
-                    end
 
-                    topos(CFrame.new(-5122, 315, -2963))
-                end
-            end)
+                        topos(CFrame.new(-5122, 315, -2963))
+                    end
+                end)
+            end
         end
-    end
-end)
-if World3 then 
-local Section = Sub:AddSection({"Elite Hunter"})
+    end)
+end
+
+-- Section "Elite Hunter" somente no Sea 3 (World3)
+if World3 then
+    local Section = Sub:AddSection({"Elite Hunter"})
+end
+
 if World3 then 
 local Toggle1 = Sub:AddToggle({
     Name = "Auto Elite Hunter",
@@ -3828,6 +3837,7 @@ Toggle1:Callback(function(Value)
         end)
     end
 end)
+end
 
 if World3 then 
 local Toggle1 = Sub:AddToggle({
@@ -3886,11 +3896,15 @@ spawn(function()
         end
     end
 end)
+end
+
 if World3 then 
 local Section = Sub:AddSection({"Ossos"})
+end
+
 if World3 then 
 local Paragraph = Sub:AddParagraph({"Farma Osso", "Se Você for Farma Osso Vai na aba Main e muda O modo de Farme Pra bone e Start farm"})
-
+end
 
 -- Toggle para AutoFarm Bone (sem dropdown)
 if World3 then  -- só cria o toggle se estiver no Sea 3
@@ -4010,6 +4024,479 @@ spawn(function()
         end
     end
 end)
+end
+
+if World3 then 
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Oração",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoPray = Value
+    StopTween(getgenv().AutoPray) 
+end)
+spawn(function()
+    while wait(0.5) do
+        if getgenv().AutoPray and World3 then    
+            local targetPos = CFrame.new(-8652.99707, 143.450119, 6170.50879)
+            if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - targetPos.Position).magnitude > 5 then
+                topos(targetPos)
+                wait(0.5)
+            end
+            pcall(function()
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("gravestoneEvent", 1)
+            end)
+        end
+    end
+end)
+end
+
+if World3 then
+local Katakuri = Tabs.Sub:AddSection("Katakuri")
+end
+
+if World3 then
+local Paragraph = Sub:AddParagraph({"Katakuri V1", "Para matar Katakuri V1 Vai Em Main e Coloca o Modo de farme pra katakuri "})
+end
+
+if World3 then
+local Toggle1 = Tab1:AddToggle({
+  Name = "Auto Katakuri V2",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoDoughKing = Value
+    StopTween(getgenv().AutoDoughKing) 
+end)
+spawn(function()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        pcall(function()
+            for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                if getgenv().AutoDoughKing and StartCakegetgenv().StartMagnet and 
+                   (v.Name == "Cookie Crafter" or v.Name == "Cake Guard" or v.Name == "Baking Staff" or v.Name == "Head Baker") and 
+                   (v.HumanoidRootPart.Position - POSCAKE.Position).magnitude <= 300 then
+                    v.HumanoidRootPart.CFrame = POSCAKE
+                    v.HumanoidRootPart.CanCollide = false
+                    if v.Humanoid:FindFirstChild("Animator") then
+                        v.Humanoid.Animator:Destroy()
+                    end
+                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                end
+            end
+        end)
+    end)
+end)
+spawn(function()
+    while task.wait(0.2) do
+        if getgenv().AutoDoughKing and World3 then
+            pcall(function()
+                if game.Players.LocalPlayer.Backpack:FindFirstChild("God's Chalice") or 
+                   game.Players.LocalPlayer.Character:FindFirstChild("God's Chalice") then
+                    if string.find(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SweetChaliceNpc"), "Where") then
+                        game.StarterGui:SetCore("SendNotification", {
+                            Title = "Notification",
+                            Text = "Not Have Enough Material",
+                            Icon = "http://www.roblox.com/asset/?id=",
+                            Duration = 2.5
+                        })
+                    else
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SweetChaliceNpc")
+                    end
+                elseif game.Players.LocalPlayer.Backpack:FindFirstChild("Sweet Chalice") or 
+                       game.Players.LocalPlayer.Character:FindFirstChild("Sweet Chalice") then
+                    if string.find(game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner"), 
+                                   "Do you want to open the portal now?") then
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner")
+                    else
+                        if game.Workspace.Enemies:FindFirstChild("Baking Staff") or 
+                           game.Workspace.Enemies:FindFirstChild("Head Baker") or 
+                           game.Workspace.Enemies:FindFirstChild("Cake Guard") or 
+                           game.Workspace.Enemies:FindFirstChild("Cookie Crafter") then
+                            for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do  
+                                if (v.Name == "Baking Staff" or v.Name == "Head Baker" or 
+                                    v.Name == "Cake Guard" or v.Name == "Cookie Crafter") and 
+                                    v.Humanoid.Health > 0 then
+                                    repeat
+                                        task.wait(0.05)
+                                        AutoHaki()
+                                        EquipWeapon(getgenv().SelectWeapon)
+                                        StartCakegetgenv().StartMagnet = true
+                                        POSCAKE = v.HumanoidRootPart.CFrame
+                                        topos(v.HumanoidRootPart.CFrame * Pos)
+                                    until getgenv().AutoDoughKing == false or 
+                                          game:GetService("ReplicatedStorage"):FindFirstChild("Cake Prince") or 
+                                          not v.Parent or 
+                                          v.Humanoid.Health <= 0
+                                end
+                            end
+                        else
+                            StartCakegetgenv().StartMagnet = false
+                            topos(CFrame.new(-1820.063, 210.748, -12297.496))
+                        end
+                    end
+                elseif game.ReplicatedStorage:FindFirstChild("Dough King") or 
+                       game:GetService("Workspace").Enemies:FindFirstChild("Dough King") then
+                    if game:GetService("Workspace").Enemies:FindFirstChild("Dough King") then
+                        for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do 
+                            if v.Name == "Dough King" then
+                                repeat
+                                    task.wait(0.05)
+                                    AutoHaki()
+                                    EquipWeapon(getgenv().SelectWeapon)
+                                    v.HumanoidRootPart.CanCollide = false
+                                    topos(v.HumanoidRootPart.CFrame * Pos)
+                                until getgenv().AutoDoughKing == false or 
+                                      not v.Parent or 
+                                      v.Humanoid.Health <= 0
+                            end    
+                        end    
+                    else
+                        topos(CFrame.new(-2009.280, 4532.972, -14937.308))
+                    end
+                elseif game.Players.LocalPlayer.Backpack:FindFirstChild("Red Key") or 
+                       game.Players.LocalPlayer.Character:FindFirstChild("Red Key") then
+                    local args = {
+                        [1] = "CakeScientist",
+                        [2] = "Check"
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                else
+                    if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                        if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or 
+                           string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") or 
+                           string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") then
+                            if game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or 
+                               game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or 
+                               game:GetService("Workspace").Enemies:FindFirstChild("Urban") then
+                                for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                                    if v.Name == "Diablo" or v.Name == "Deandre" or v.Name == "Urban" then
+                                        if v:FindFirstChild("Humanoid") and 
+                                           v:FindFirstChild("HumanoidRootPart") and 
+                                           v.Humanoid.Health > 0 then
+                                            repeat
+                                                task.wait(0.05)
+                                                AutoHaki()
+                                                EquipWeapon(getgenv().SelectWeapon)    
+                                                v.HumanoidRootPart.CanCollide = false
+                                                v.Humanoid.WalkSpeed = 0
+                                                topos(v.HumanoidRootPart.CFrame * Pos)                                                    
+                                                sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                                            until getgenv().AutoDoughKing == false or 
+                                                  v.Humanoid.Health <= 0 or 
+                                                  not v.Parent or 
+                                                  game.Players.LocalPlayer.Backpack:FindFirstChild("God's Chalice") or 
+                                                  game.Players.LocalPlayer.Character:FindFirstChild("God's Chalice")
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+end
+
+if World3 then
+local Toggle1 = Sub:AddToggle({
+    Name = "Auto Spawn Katakuri V1",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+        "CakePrinceSpawner",
+        Value
+    )
+end)
+end
+
+-- Auto Ectoplasm (somente Sea 2)
+if World2 then
+    local Toggle1 = Sub:AddToggle({
+        Name = "Auto Ectoplasm",
+        Description = "",
+        Default = false
+    })
+
+    Toggle1:Callback(function(Value)
+        _G.Ectoplasm = Value
+    end)
+
+    spawn(function()
+        while task.wait(0.1) do
+            pcall(function()
+                if _G.Ectoplasm then
+                    local Enemies = game:GetService("Workspace").Enemies
+
+                    if Enemies:FindFirstChild("Ship Deckhand")
+                    or Enemies:FindFirstChild("Ship Engineer")
+                    or Enemies:FindFirstChild("Ship Steward")
+                    or Enemies:FindFirstChild("Ship Officer") then
+
+                        for _, v in pairs(Enemies:GetChildren()) do
+                            if (v.Name == "Ship Steward"
+                            or v.Name == "Ship Engineer"
+                            or v.Name == "Ship Deckhand"
+                            or v.Name == "Ship Officer")
+                            and v:FindFirstChild("Humanoid")
+                            and v.Humanoid.Health > 0 then
+
+                                repeat
+                                    task.wait(0)
+                                    AutoHaki()
+                                    bringmob = true
+                                    EquipTool(SelectWeapon)
+
+                                    Tween(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
+
+                                    v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                    v.HumanoidRootPart.Transparency = 1
+                                    v.Humanoid.JumpPower = 0
+                                    v.Humanoid.WalkSpeed = 0
+                                    v.HumanoidRootPart.CanCollide = false
+
+                                    FarmPos = v.HumanoidRootPart.CFrame
+                                    MonFarm = v.Name
+                                until not _G.Ectoplasm
+                                    or not v.Parent
+                                    or v.Humanoid.Health <= 0
+                                    or not Enemies:FindFirstChild(v.Name)
+
+                                bringmob = false
+                            end
+                        end
+                    else
+                        local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
+                        local TargetPos = Vector3.new(904.4072265625, 181.05767822266, 33341.38671875)
+                        local Distance = (TargetPos - HRP.Position).Magnitude
+
+                        if Distance > 20000 then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
+                                "requestEntrance",
+                                Vector3.new(923.21252441406, 126.9760055542, 32852.83203125)
+                            )
+                        end
+
+                        Tween(CFrame.new(TargetPos))
+                    end
+                end
+            end)
+        end
+    end)
+end
+
+local Section = Sub:AddSection({"baú"})
+
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Baú",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoFarmChest = Value 
+end)
+spawn(function()
+    local lastTarget = nil
+    while wait(0.2) do
+        if getgenv().AutoFarmChest then
+            local player = game:GetService("Players").LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local playerPos = character:GetPivot().Position
+            local chestService = game:GetService("CollectionService")
+            local chests = chestService:GetTagged("_ChestTagged")
+            local closestChest, minDist = nil, math.huge
+            for _, chest in ipairs(chests) do
+                if not chest:GetAttribute("IsDisabled") then
+                    local dist = (chest:GetPivot().Position - playerPos).Magnitude
+                    if dist < minDist then
+                        minDist, closestChest = dist, chest
+                    end
+                end
+            end
+            if closestChest and closestChest ~= lastTarget then
+                lastTarget = closestChest
+                topos(closestChest:GetPivot())
+            end
+        end
+    end
+end)
+
+local Toggle1 = Sub:AddToggle({
+    Name = "Pare Quando Tiver o Cálice de Deus & Punho das Trevas",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    getgenv().StopChest = Value
+end)
+
+-- Parar AutoFarmChest e TP Chests ao pegar itens raros
+task.spawn(function()
+    while task.wait(0.5) do
+        if getgenv().StopChest then
+            local player = game.Players.LocalPlayer
+            if not player then continue end
+
+            local backpack = player:FindFirstChild("Backpack")
+            local character = player.Character
+            if not backpack or not character then continue end
+
+            if backpack:FindFirstChild("Fist of Darkness")
+            or character:FindFirstChild("Fist of Darkness")
+            or backpack:FindFirstChild("God's Chalice")
+            or character:FindFirstChild("God's Chalice") then
+
+                -- DESATIVA AUTO FARM CHEST
+                getgenv().AutoFarmChest = false
+                if ToggleChest and typeof(ToggleChest.Set) == "function" then
+                    ToggleChest:Set(false)
+                end
+
+                -- DESATIVA TP CHESTS
+                Enabled = false
+                if ChestTP and typeof(ChestTP.Set) == "function" then
+                    ChestTP:Set(false)
+                end
+
+                print("Item raro detectado — Auto Chest e TP Chests foram desligados automaticamente.")
+                break
+            end
+        end
+    end
+end)
+
+-- Configurações
+local TpDelay = 0.2
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local Enabled = false
+local ChestCounter = 0
+local FirstRun = true
+
+-- Função para pegar o personagem
+local function getCharacter()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    char:WaitForChild("HumanoidRootPart")
+    return char
+end
+
+-- Ordena baús por distância
+local function DistanceFromPlrSort(list)
+    local Root = getCharacter().HumanoidRootPart
+    table.sort(list, function(A, B)
+        return (Root.Position - A.Position).Magnitude < (Root.Position - B.Position).Magnitude
+    end)
+end
+
+-- Coleta lista de baús válidos
+local UncheckedChests = {}
+
+local function getChestsSorted()
+    if FirstRun then
+        FirstRun = false
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name:find("Chest") then
+                table.insert(UncheckedChests, obj)
+            end
+        end
+    end
+
+    local chests = {}
+    for _, chest in pairs(UncheckedChests) do
+        if chest and chest.Parent and chest:FindFirstChild("TouchInterest") then
+            table.insert(chests, chest)
+        end
+    end
+
+    DistanceFromPlrSort(chests)
+    return chests
+end
+
+-- Noclip
+local function toggleNoclip(bool)
+    for _, p in pairs(getCharacter():GetChildren()) do
+        if p:IsA("BasePart") then
+            p.CanCollide = not bool
+        end
+    end
+end
+
+-- TP instantâneo
+local function Teleport(cf)
+    toggleNoclip(true)
+    local Root = getCharacter().HumanoidRootPart
+    Root.CFrame = cf + Vector3.new(0, 3, 0)
+    task.wait(0.15)
+    toggleNoclip(false)
+end
+
+-- Anti-kick
+task.spawn(function()
+    while task.wait(30) do
+        if Enabled then
+            pcall(function()
+                sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+            end)
+        end
+    end
+end)
+
+-- Reset do personagem
+local function resetCharacter()
+    ChestCounter = 0
+    task.wait(0.5)
+    LocalPlayer.Character:BreakJoints()
+    LocalPlayer.CharacterAdded:Wait()
+    task.wait(1)
+end
+
+-- LOOP PRINCIPAL
+local function main()
+    while Enabled do
+        local chests = getChestsSorted()
+
+        if #chests > 0 then
+            Teleport(chests[1].CFrame)
+
+            ChestCounter += 1
+            print("Baú coletado: " .. ChestCounter)
+
+            if ChestCounter >= 3 then
+                print("3 baús coletados — resetando personagem...")
+                resetCharacter()
+            end
+        else
+            print("Nenhum baú encontrado.")
+        end
+
+        task.wait(TpDelay)
+    end
+end
+
+-- Toggle (NOVO FORMATO)
+local Toggle1 = Sub:AddToggle({
+    Name = "TP Baú (Chances de kick)",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    Enabled = Value
+    if Enabled then
+        print("Script ativado.")
+        task.spawn(main)
+    else
+        print("Script desativado.")
+        ChestCounter = 0
+    end
+end)
+
 
 -------Playerstab---
 
