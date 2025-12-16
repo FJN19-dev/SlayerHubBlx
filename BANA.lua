@@ -3032,7 +3032,7 @@ end
 
 getgenv().SelectBoss = tableBoss[1]
 
-local Dropdown = Other:AddDropdown({
+local Dropdown = Main:AddDropdown({
     Name = "Selecionar Boss",
     Description = "",
     Options = tableBoss,
@@ -3568,34 +3568,193 @@ Toggle1:Callback(function(Value)
     getgenv().SkillF = Value
 end)
 
+
+-- Monta a lista de players
+local Playerslist = {}
+for i, player in ipairs(game.Players:GetPlayers()) do
+    table.insert(Playerslist, player.Name)
+end    
+
+-- Cria o Dropdown na nova sintaxe
+local Dropdown = PlayersTab:AddDropdown({
+    Name = "Players Lista",
+    Description = "Selecionar Player PVP",
+    Options = Playerslist,
+    Default = Playerslist[1] or "",
+    Flag = "SelectPlayerDropdown",
+    Callback = function(Value)
+        getgenv().SelectPlayer = Value
+    end
+})
 local Toggle1 = PlayersTab:AddToggle({
-  Name = "Auto Aimbot",
+  Name = "Teleporta Player",
   Description = "",
   Default = false 
 })
 Toggle1:Callback(function(Value)
-    getgenv().Aimbot = Value
+   getgenv().TeleportPlayer = Value
+    if getgenv().TeleportPlayer then
+        task.spawn(function()
+            while getgenv().TeleportPlayer do
+                local player = game:GetService("Players"):FindFirstChild(getgenv().SelectPlayer)
+                if player and player.Character then
+                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        topos(hrp.CFrame)
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- ================================
+-- SERVICES
+-- ================================
+local PlayersService = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = PlayersService.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- ================================
+-- CONFIG
+-- ================================
+getgenv().AimbotSkill = false
+getgenv().AimPart = "HumanoidRootPart" -- ou "Head"
+getgenv().AimDistance = 1500
+
+-- ================================
+-- TOGGLE (TAB PLAYERS)
+-- ================================
+local ToggleAimbot = PlayersTab:AddToggle({
+    Name = "Aimbot Camera",
+    Description = "Mira sempre no player mais próximo",
+    Default = false
+})
+
+ToggleAimbot:Callback(function(Value)
+    getgenv().AimbotSkill = Value
+end)
+
+-- ================================
+-- FUNÇÃO: PLAYER MAIS PRÓXIMO
+-- ================================
+local function GetClosestPlayer()
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+
+    local myHRP = LocalPlayer.Character.HumanoidRootPart
+    local closestPart = nil
+    local shortest = math.huge
+
+    for _, plr in pairs(PlayersService:GetPlayers()) do
+        if plr ~= LocalPlayer
+            and plr.Team ~= LocalPlayer.Team
+            and plr.Character
+            and plr.Character:FindFirstChild(getgenv().AimPart)
+            and plr.Character:FindFirstChild("Humanoid")
+            and plr.Character.Humanoid.Health > 0 then
+
+            local part = plr.Character[getgenv().AimPart]
+            local dist = (part.Position - myHRP.Position).Magnitude
+
+            if dist < shortest and dist <= getgenv().AimDistance then
+                shortest = dist
+                closestPart = part
+            end
+        end
+    end
+
+    return closestPart
+end
+
+-- ================================
+-- LOOP DO AIMBOT (SEMPRE O MAIS PERTO)
+-- ================================
+RunService.RenderStepped:Connect(function()
+    if not getgenv().AimbotSkill then return end
+
+    local target = GetClosestPlayer()
+    if target then
+        Camera.CFrame = CFrame.new(
+            Camera.CFrame.Position,
+            target.Position
+        )
+    end
+end)
+
+local Toggle1 = PlayersTab:AddToggle({
+  Name = "Aimbot Gun",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AimbotGun = Value 
 end)
 spawn(function()
-    pcall(function()
-        while task.wait(0.1) do
-            if getgenv().Aimbot and getgenv().SelectPlayer then
-                local player = game.Players:FindFirstChild(getgenv().SelectPlayer)
-                local localPlayer = game.Players.LocalPlayer
-                local character = localPlayer.Character
-                local tool = character and character:FindFirstChildOfClass("Tool")
-                if player and player.Character and tool then
-                    local remoteEvent = tool:FindFirstChild("RemoteEvent")
-                    local mousePos = tool:FindFirstChild("MousePos")
-                    local target = player.Character:FindFirstChild("HumanoidRootPart")
-                    if remoteEvent and mousePos and target then
-                        remoteEvent:FireServer(target.Position)
+    while task.wait(0.1) do
+        if getgenv().AimbotGun and SelectWeaponGun then
+            local player = game:GetService("Players").LocalPlayer
+            local character = player and player.Character
+            local weapon = character and character:FindFirstChild(SelectWeaponGun)
+            local targetPlayer = game:GetService("Players"):FindFirstChild(getgenv().SelectPlayer)
+            local targetCharacter = targetPlayer and targetPlayer.Character
+            local targetHumanoidRootPart = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+            if weapon and targetHumanoidRootPart then
+                pcall(function()
+                    weapon.Cooldown.Value = 0
+                    local args = {
+                        [1] = targetHumanoidRootPart.Position,
+                        [2] = targetHumanoidRootPart
+                    }
+                    weapon.RemoteFunctionShoot:InvokeServer(unpack(args))
+                    local virtualUser = game:GetService("VirtualUser")
+                    virtualUser:Button1Down(Vector2.new(1280, 672))
+                end)
+            end
+        end
+    end
+end)
+local Toggle1 = PlayersTab:AddToggle({
+  Name = "Safe Modes",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().SafeMode = Value 
+end)
+spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if getgenv().SafeMode then
+                local CharacterPlayer = game.Players.LocalPlayer.Character
+                if CharacterPlayer and CharacterPlayer:FindFirstChild("Humanoid") and CharacterPlayer:FindFirstChild("HumanoidRootPart") then
+                    local HealthMinPlayer = CharacterPlayer.Humanoid.MaxHealth * (getgenv().Safe / 100)
+                    if CharacterPlayer.Humanoid.Health <= HealthMinPlayer then
+                        while getgenv().SafeMode and CharacterPlayer.Humanoid.Health <= HealthMinPlayer do
+                            task.wait(0.1)
+                            CharacterPlayer.HumanoidRootPart.CFrame = CharacterPlayer.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+                        end
                     end
                 end
             end
-        end
-    end)
+        end)
+    end
 end)
+
+PlayersTab:AddSlider({
+  Name = "Safe Mode At",
+  Min = 0,
+  Max = 100,
+  Increase = 1,
+  Default = 30,
+  Callback = function(Value)
+        getgenv().Safe = Value  
+  end
+})
 
 local Section = PlayersTab:AddSection({"Esp"})
 
@@ -3745,10 +3904,18 @@ ESPFolder.Name = "ESP_PLAYERS"
 ESPFolder.Parent = workspace
 
 -- =========================
+-- ESP STORAGE
+-- =========================
+local ESPStorage = {} -- Guarda {Gui, TextLabel} de cada player
+
+-- =========================
 -- CLEAR ESP
 -- =========================
 local function ClearESPPlayers()
-    ESPFolder:ClearAllChildren()
+    for _, v in pairs(ESPStorage) do
+        v.Gui:Destroy()
+    end
+    table.clear(ESPStorage)
 end
 
 -- =========================
@@ -3761,8 +3928,8 @@ local function CreatePlayerESP(player)
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    if ESPFolder:FindFirstChild(player.Name) then
-        return ESPFolder[player.Name]
+    if ESPStorage[player] then
+        return ESPStorage[player].Gui, ESPStorage[player].Text
     end
 
     -- BILLBOARD
@@ -3770,9 +3937,9 @@ local function CreatePlayerESP(player)
     gui.Name = player.Name
     gui.Parent = ESPFolder
     gui.Adornee = hrp
-    gui.Size = UDim2.new(0, 200, 0, 40) -- 🔹 MESMO TAMANHO ISLAND
+    gui.Size = UDim2.new(0, 200, 0, 40)
     gui.AlwaysOnTop = true
-    gui.MaxDistance = math.huge -- 🔥 DISTÂNCIA INFINITA
+    gui.MaxDistance = math.huge
 
     -- FOTO
     local img = Instance.new("ImageLabel")
@@ -3799,9 +3966,10 @@ local function CreatePlayerESP(player)
     txt.Font = Enum.Font.GothamBold
     txt.TextXAlignment = Enum.TextXAlignment.Left
     txt.TextStrokeTransparency = 0
-    txt.TextColor3 = Color3.fromRGB(170, 0, 255) -- ROXO
+    txt.TextColor3 = Color3.fromRGB(170, 0, 255)
     txt.Text = player.Name .. " | 0 M"
 
+    ESPStorage[player] = {Gui = gui, Text = txt}
     return gui, txt
 end
 
@@ -3824,8 +3992,30 @@ RunService.RenderStepped:Connect(function()
                     local dist = math.floor((hrp.Position - myHRP.Position).Magnitude)
                     txt.Text = plr.Name .. " | " .. dist .. " M"
                 end
+            else
+                -- Remove ESP se não tiver HRP
+                if ESPStorage[plr] then
+                    ESPStorage[plr].Gui:Destroy()
+                    ESPStorage[plr] = nil
+                end
+            end
+        else
+            -- Remove ESP se player for local ou não tiver personagem
+            if ESPStorage[plr] then
+                ESPStorage[plr].Gui:Destroy()
+                ESPStorage[plr] = nil
             end
         end
+    end
+end)
+
+-- =========================
+-- PLAYER JOIN/LEAVE HANDLER
+-- =========================
+PlayersService.PlayerRemoving:Connect(function(player)
+    if ESPStorage[player] then
+        ESPStorage[player].Gui:Destroy()
+        ESPStorage[player] = nil
     end
 end)
 
@@ -3844,6 +4034,7 @@ ESPPlayersToggle:Callback(function(Value)
         ClearESPPlayers()
     end
 end)
+
 
 -- ======================================================
 -- SERVICES
