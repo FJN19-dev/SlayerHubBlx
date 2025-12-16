@@ -3570,7 +3570,6 @@ end)
 
 ------Sub-------
 
-if Sea2 then
 local Toggle1 = Sub:AddToggle({
    Name = "Auto Factory",
    Description = "",
