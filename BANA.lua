@@ -4327,6 +4327,156 @@ spawn(function()
     end
 end)
 
+local Toggle1 = Sub:AddToggle({
+    Name = "Pare Quando Tiver o Cálice de Deus & Punho das Trevas",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    getgenv().StopChest = Value
+end)
+
+-- Parar AutoFarmChest e TP Chests ao pegar itens raros
+task.spawn(function()
+    while task.wait(0.5) do
+        if getgenv().StopChest then
+            local player = game.Players.LocalPlayer
+            if not player then continue end
+
+            local backpack = player:FindFirstChild("Backpack")
+            local character = player.Character
+            if not backpack or not character then continue end
+
+            if backpack:FindFirstChild("Fist of Darkness")
+            or character:FindFirstChild("Fist of Darkness")
+            or backpack:FindFirstChild("God's Chalice")
+            or character:FindFirstChild("God's Chalice") then
+
+                -- DESATIVA AUTO FARM CHEST
+                getgenv().AutoFarmChest = false
+                if ToggleChest and typeof(ToggleChest.Set) == "function" then
+                    ToggleChest:Set(false)
+                end
+
+                -- DESATIVA TP CHESTS
+                Enabled = false
+                if ChestTP and typeof(ChestTP.Set) == "function" then
+                    ChestTP:Set(false)
+                end
+
+                print("Item raro detectado — Auto Chest e TP Chests foram desligados automaticamente.")
+                break
+            end
+        end
+    end
+end)
+
+if World2 then
+local Section = Sub:AddSection({"Raça"})
+end
+
+if World2 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Cyborg",
+  Description = "Buy Chip And Kill Order",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoCyborg = Value
+end)
+spawn(function()
+    pcall(function()
+        while task.wait(0.5) do
+            if getgenv().AutoCyborg then
+                if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
+                and not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") 
+                and not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
+                and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                    wait(0.3)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "1")
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2")
+                end
+            end
+        end
+    end)
+end)
+spawn(function()
+    pcall(function()
+        while task.wait(0.5) do
+            if getgenv().AutoCyborg then
+                if not game:GetService("Workspace").Enemies:FindFirstChild("Order") 
+                and not game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                    if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Microchip") 
+                    or game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Microchip") then
+                        fireclickdetector(
+                            game:GetService("Workspace").Map.CircleIsland.RaidSummon.Button.Main.ClickDetector
+                        )
+                    end
+                end                
+                if game:GetService("ReplicatedStorage"):FindFirstChild("Order") 
+                or game:GetService("Workspace").Enemies:FindFirstChild("Order") then
+                    if game:GetService("Workspace").Enemies:FindFirstChild("Order") then
+                        for _, i in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if i.Name == "Order" then
+                                repeat 
+                                    task.wait(0.1)
+                                    AutoHaki()
+                                    EquipWeapon(getgenv().SelectWeapon)
+                                    topos(i.HumanoidRootPart.CFrame * Pos)
+                                    i.HumanoidRootPart.CanCollide = false
+                                    i.HumanoidRootPart.Size = Vector3.new(120, 120, 120)
+                                until not i.Parent or i.Humanoid.Health <= 0 or getgenv().AutoCyborg == false
+                            end
+                        end
+                    elseif game:GetService("ReplicatedStorage"):FindFirstChild("Order") then
+                        topos(CFrame.new(-6217.2021484375, 28.047645568848, -5053.1357421875))
+                    end
+                end
+            end
+        end
+    end)
+end)
+end
+
+if World2 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Ghoul",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)    
+    getgenv().AutoGhoul = Value 
+end)
+spawn(function()
+    while task.wait(0.1) do
+        if not getgenv().AutoGhoul then break end
+        local enemies = game:GetService("Workspace").Enemies
+        local cursedCaptain = enemies:FindFirstChild("Cursed Captain")
+        if cursedCaptain and cursedCaptain:FindFirstChild("Humanoid") and cursedCaptain:FindFirstChild("HumanoidRootPart") then
+            local humanoid = cursedCaptain.Humanoid
+            local rootPart = cursedCaptain.HumanoidRootPart
+            if humanoid.Health > 0 then
+                rootPart.CanCollide = false
+                humanoid.WalkSpeed = 0
+                rootPart.Size = Vector3.new(50,50,50)
+                repeat
+                    task.wait(0.05)
+                    AutoHaki()
+                    EquipWeapon(getgenv().SelectWeapon)
+                    topos(rootPart.CFrame * CFrame.new(0, 10, 0))
+                    sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", 1000)
+                until not getgenv().AutoGhoul or humanoid.Health <= 0 or not cursedCaptain.Parent
+            end
+        else
+            local storageCaptain = game:GetService("ReplicatedStorage"):FindFirstChild("Cursed Captain")
+            if storageCaptain then
+                topos(storageCaptain.HumanoidRootPart.CFrame * CFrame.new(5,10,2))
+            end
+        end
+    end
+end)
+end
 
 
 -- Configurações
@@ -4436,22 +4586,21 @@ local function main()
     end
 end
 
--- Toggle (NOVO FORMATO)
-local Toggle1 = Sub:AddToggle({
-    Name = "TP Baú (Chances de kick)",
-    Description = "",
-    Default = false
+-- Toggle
+local ChestTP = Sub:AddToggle({
+  Name = "Tp Baú (chance de kick)",
+  Description = "",
+  Default = false 
 })
-
-Toggle1:Callback(function(Value)
-    Enabled = Value
+ChestTP:Callback(function(Value)
+    Enabled = value
     if Enabled then
         print("Script ativado.")
         task.spawn(main)
     else
         print("Script desativado.")
         ChestCounter = 0
-    end
+    end 
 end)
 
 
