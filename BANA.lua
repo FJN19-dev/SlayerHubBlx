@@ -4478,130 +4478,413 @@ spawn(function()
 end)
 end
 
+local Observacao = Sub:AddSection("Farm Observação") 
 
--- Configurações
-local TpDelay = 0.2
-local LocalPlayer = game:GetService("Players").LocalPlayer
-local Enabled = false
-local ChestCounter = 0
-local FirstRun = true
+ObservationRange = Sub:AddParagraph({"Observação Level", ""})
+spawn(function()
+    local lastValue = game:GetService("Players").LocalPlayer.VisionRadius.Value
+    while wait(0.1) do
+        pcall(function()
+            local currentValue = game:GetService("Players").LocalPlayer.VisionRadius.Value
+            if currentValue ~= lastValue then
+                ObservationRange:SetDesc("Observation Range Level: " .. math.floor(currentValue))
+                lastValue = currentValue
+            end
+        end)
+    end
+end)
 
--- Função para pegar o personagem
-local function getCharacter()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    char:WaitForChild("HumanoidRootPart")
-    return char
-end
-
--- Ordena baús por distância
-local function DistanceFromPlrSort(list)
-    local Root = getCharacter().HumanoidRootPart
-    table.sort(list, function(A, B)
-        return (Root.Position - A.Position).Magnitude < (Root.Position - B.Position).Magnitude
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto UP Observação V2",
+  Description = "This is a <font color='rgb(88, 101, 242)'>Toggle</font> Example",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoObservationHakiV2 = Value
+    StopTween(getgenv().AutoObservationHakiV2) 
+end)
+spawn(function()
+    local lastUpdateTime = tick()
+    while task.wait(0.1) do
+        pcall(function()
+            if getgenv().AutoObservationHakiV2 and World3 then
+                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
+                    if tick() - lastUpdateTime >= 1 then
+                        topos(CFrame.new(-12444.78515625, 332.40396118164, -7673.1806640625))
+                        lastUpdateTime = tick()
+                    end
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen")
+                    task.wait(1)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "CitizenQuest", 1)
+                else
+                    if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Defeat 50 Forest Pirates") then
+                        if game:GetService("Workspace").Enemies:FindFirstChild("Forest Pirate") then
+                            for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                                if v.Name == "Forest Pirate" then
+                                    repeat
+                                        if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+                                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+                                        end
+                                        EquipWeapon(getgenv().SelectWeapon)
+                                        topos(v.HumanoidRootPart.CFrame * Pos)
+                                        PosHee = v.HumanoidRootPart.CFrame
+                                        v.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame
+                                        v.HumanoidRootPart.CanCollide = false
+                                        v.Humanoid.WalkSpeed = 0
+                                        v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                                    until getgenv().AutoObservationHakiV2 == false or v.Humanoid.Health <= 0
+                                end
+                            end
+                        end
+                    elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text == "Defeat Captain Elephant (0/1)" then
+                        if game:GetService("Workspace").Enemies:FindFirstChild("Captain Elephant") then
+                            for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                                if v.Name == "Captain Elephant" then
+                                    repeat
+                                        if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+                                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+                                        end
+                                        EquipWeapon(getgenv().SelectWeapon)
+                                        topos(v.HumanoidRootPart.CFrame * Pos)
+                                        if sethiddenproperty then
+                                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                        end
+                                        v.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame
+                                        v.HumanoidRootPart.CanCollide = false
+                                        v.Humanoid.WalkSpeed = 0
+                                        v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                                    until getgenv().AutoObservationHakiV2 == false or v.Humanoid.Health <= 0
+                                end
+                            end
+                        end
+                    end
+                end
+                if game.Players.LocalPlayer.Backpack:FindFirstChild("Banana") and 
+                    game.Players.LocalPlayer.Backpack:FindFirstChild("Apple") and 
+                    game.Players.LocalPlayer.Backpack:FindFirstChild("Pineapple") then
+                    if tick() - lastUpdateTime >= 1 then
+                        topos(CFrame.new(-12444.78515625, 332.40396118164, -7673.1806640625))
+                        lastUpdateTime = tick()
+                    end
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen")
+                elseif game.Players.LocalPlayer.Backpack:FindFirstChild("Fruit Bowl") or 
+                        game.Players.LocalPlayer.Character:FindFirstChild("Fruit Bowl") then
+                    if tick() - lastUpdateTime >= 1 then
+                        topos(CFrame.new(-10920.125, 624.20275878906, -10266.995117188))
+                        lastUpdateTime = tick()
+                    end
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("KenTalk2", "Start")
+                    task.wait(1)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("KenTalk2", "Buy")
+                end
+            end
+        end)
+    end
+end)
+spawn(function()
+    local lastUpdate = tick()
+    while true do
+        task.wait(0.1)
+        pcall(function()
+            if getgenv().AutoObservationHakiV2 and World3 then
+                if sethiddenproperty then
+                    if tick() - lastUpdate >= 1 then
+                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        lastUpdate = tick()
+                    end
+                end
+            end
+        end)
+    end
+end)
+spawn(function()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        pcall(function()
+            if getgenv().AutoObservationHakiV2 and World3 then
+                local character = game:GetService("Players").LocalPlayer.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    local humanoid = character.Humanoid
+                    if humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+                        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                    end
+                end
+            end
+        end)
     end)
-end
+end)
+spawn(function()
+    pcall(function()
+        game:GetService("RunService").Heartbeat:Connect(function()
+            task.wait(0.1)
+            if getgenv().AutoObservationHakiV2 and getgenv().StartMagnet then
+                local enemies = game.Workspace.Enemies:GetChildren()
+                for i, v in ipairs(enemies) do
+                    if v.Name == "Forest Pirate" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                        local humanoidRootPart = v.HumanoidRootPart
+                        if humanoidRootPart.CanCollide ~= false then
+                            humanoidRootPart.CanCollide = false
+                        end
+                        if humanoidRootPart.Size ~= Vector3.new(50, 50, 50) then
+                            humanoidRootPart.Size = Vector3.new(50, 50, 50)
+                        end
+                        if humanoidRootPart.CFrame ~= PosHee then
+                            humanoidRootPart.CFrame = PosHee
+                        end
+                    end
+                end
+            end
+        end)
+    end)
+end)
+spawn(function()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        pcall(function()
+            if getgenv().AutoObservationHakiV2 and getgenv().StartMagnet then
+                CheckQuest()
+                local enemies = game.Workspace.Enemies:GetChildren()
+                for i, v in ipairs(enemies) do
+                    if v.Name == Ms and v:FindFirstChild("Humanoid") then
+                        local humanoid = v.Humanoid
+                        if humanoid.Health > 0 then
+                            humanoid:ChangeState(11)
+                            task.wait(0.1)
+                            humanoid:ChangeState(14)
+                        end
+                    end
+                end
+            end
+        end)
+    end)
+end)
 
--- Coleta lista de baús válidos
-local UncheckedChests = {}
-
-local function getChestsSorted()
-    if FirstRun then
-        FirstRun = false
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Name:find("Chest") then
-                table.insert(UncheckedChests, obj)
+local Toggle1 = Sub:AddToggle({
+  Name = "Farm Observação",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoObservation = Value
+    StopTween(getgenv().AutoObservation) 
+end)
+spawn(function()
+    pcall(function()
+        while task.wait(0.1) do
+            if getgenv().AutoObservation then
+                if game:GetService("Players").LocalPlayer.VisionRadius.Value >= 5000 then
+                    Alert:create("You Have Max Points")
+                    task.wait(1)
+                else
+                    local enemyName, spawnPos
+                    local player = game:GetService("Players").LocalPlayer
+                    local workspaceEnemies = game:GetService("Workspace").Enemies
+                    local gui = player.PlayerGui.ScreenGui
+                    if World2 then
+                        enemyName = "Lava Pirate [Lv. 1200]"
+                        spawnPos = CFrame.new(-5478.39209, 15.9775667, -5246.9126)
+                    elseif World1 then
+                        enemyName = "Galley Captain"
+                        spawnPos = CFrame.new(5533.29785, 88.1079102, 4852.3916)
+                    elseif World3 then
+                        enemyName = "Venomous Assailant"
+                        spawnPos = CFrame.new(4638.78564453125, 1078.94091796875, 881.8002319335938)
+                    end
+                    local enemy = workspaceEnemies:FindFirstChild(enemyName)
+                    if enemy then
+                        if gui:FindFirstChild("ImageLabel") then
+                            repeat
+                                task.wait(0.1)
+                                player.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(3, 0, 0)
+                            until not getgenv().AutoObservation or not gui:FindFirstChild("ImageLabel")
+                        else
+                            repeat
+                                task.wait(0.1)
+                                player.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0)
+                                if not gui:FindFirstChild("ImageLabel") and getgenv().AutoObservation_Hop then
+                                    game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+                                end
+                            until not getgenv().AutoObservation or gui:FindFirstChild("ImageLabel")
+                        end
+                    else
+                        topos(spawnPos)
+                    end
+                end
             end
         end
-    end
+    end)
+end)
 
-    local chests = {}
-    for _, chest in pairs(UncheckedChests) do
-        if chest and chest.Parent and chest:FindFirstChild("TouchInterest") then
-            table.insert(chests, chest)
+if World3 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Rip Indra",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoRipIndra = Value
+    StopTween(getgenv().AutoRipIndra) 
+end)
+spawn(function()
+    pcall(function()
+        while task.wait(1) do
+            if getgenv().AutoRipIndra and World3 then
+                local enemies = game:GetService("Workspace").Enemies
+                local player = game:GetService("Players").LocalPlayer                
+                if enemies:FindFirstChild("rip_indra True Form") or enemies:FindFirstChild("rip_indra") then
+                    for _, v in pairs(enemies:GetChildren()) do
+                        if (v.Name == "rip_indra True Form" or v.Name == "rip_indra") and v.Humanoid.Health > 0 and v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            repeat
+                                task.wait(0.3)
+                                pcall(function()
+                                    AutoHaki()
+                                    EquipWeapon(getgenv().SelectWeapon)
+                                    v.HumanoidRootPart.CanCollide = false
+                                    v.Humanoid.WalkSpeed = 0
+                                    topos(v.HumanoidRootPart.CFrame * Pos)
+                                end)
+                            until getgenv().AutoRipIndra == false or v.Humanoid.Health <= 0
+                        end
+                    end
+                elseif player.Backpack:FindFirstChild("God's Chalice") or player.Character:FindFirstChild("God's Chalice") then
+                    repeat
+                        task.wait(0.3)
+                        topos(CFrame.new(-5563.75048828125, 320.4276123046875, -2662.509521484375))
+                        EquipWeapon("God's Chalice")
+                    until not (player.Backpack:FindFirstChild("God's Chalice") or player.Character:FindFirstChild("God's Chalice"))
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form") then
+                    local ripIndraTrueForm = game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form")
+                    topos(ripIndraTrueForm.HumanoidRootPart.CFrame * Pos)
+                end
+            end
         end
-    end
+    end)
+end)
 
-    DistanceFromPlrSort(chests)
-    return chests
-end
-
--- Noclip
-local function toggleNoclip(bool)
-    for _, p in pairs(getCharacter():GetChildren()) do
-        if p:IsA("BasePart") then
-            p.CanCollide = not bool
-        end
-    end
-end
-
--- TP instantâneo
-local function Teleport(cf)
-    toggleNoclip(true)
-    local Root = getCharacter().HumanoidRootPart
-    Root.CFrame = cf + Vector3.new(0, 3, 0)
-    task.wait(0.15)
-    toggleNoclip(false)
-end
-
--- Anti-kick
-task.spawn(function()
-    while task.wait(30) do
-        if Enabled then
+if World2 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Barba Negra",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoDarkbeard = Value
+    StopTween(getgenv().AutoDarkbeard)
+end)
+spawn(function()
+    while task.wait(0.1) do
+        if getgenv().AutoDarkbeard and World2 then
             pcall(function()
-                sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+                local enemies = game:GetService("Workspace").Enemies
+                local player = game:GetService("Players").LocalPlayer
+                if enemies:FindFirstChild("Darkbeard") then
+                    for _, v in pairs(enemies:GetChildren()) do
+                        if v.Name == "Darkbeard" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                            repeat
+                                task.wait(0.05)
+                                AutoHaki()
+                                EquipWeapon(getgenv().SelectWeapon)
+                                v.HumanoidRootPart.CanCollide = false
+                                v.Humanoid.WalkSpeed = 0           
+                                topos(v.HumanoidRootPart.CFrame * Pos)
+                            until not getgenv().AutoDarkbeard or not v.Parent or v.Humanoid.Health <= 0
+                        end
+                    end
+                elseif player.Backpack:FindFirstChild("Fist of Darkness") or player.Character:FindFirstChild("Fist of Darkness") then
+                    repeat
+                        task.wait(0.1)
+                        topos(CFrame.new(3778.584, 15.791, -3499.404))
+                        EquipWeapon("Fist of Darkness")
+                    until not getgenv().AutoDarkbeard
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Darkbeard") then
+                    topos(game:GetService("ReplicatedStorage"):FindFirstChild("Darkbeard").HumanoidRootPart.CFrame * Pos)
+                end
             end)
         end
     end
 end)
-
--- Reset do personagem
-local function resetCharacter()
-    ChestCounter = 0
-    task.wait(0.5)
-    LocalPlayer.Character:BreakJoints()
-    LocalPlayer.CharacterAdded:Wait()
-    task.wait(1)
 end
 
--- LOOP PRINCIPAL
-local function main()
-    while Enabled do
-        local chests = getChestsSorted()
-
-        if #chests > 0 then
-            Teleport(chests[1].CFrame)
-
-            ChestCounter += 1
-            print("Baú coletado: " .. ChestCounter)
-
-            if ChestCounter >= 3 then
-                print("3 baús coletados — resetando personagem...")
-                resetCharacter()
-            end
-        else
-            print("Nenhum baú encontrado.")
-        end
-
-        task.wait(TpDelay)
-    end
-end
-
--- Toggle
-local ChestTP = Sub:AddToggle({
-  Name = "Tp Baú (chance de kick)",
+if World3 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Haki do Touch Pad",
   Description = "",
   Default = false 
 })
-ChestTP:Callback(function(Value)
-    Enabled = value
-    if Enabled then
-        print("Script ativado.")
-        task.spawn(main)
-    else
-        print("Script desativado.")
-        ChestCounter = 0
-    end 
+Toggle1:Callback(function(Value)
+    getgenv().AutoTouchPadHaki = Value
+    StopTween(getgenv().AutoTouchPadHaki) 
 end)
+spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            if getgenv().AutoTouchPadHaki and World3 then
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("activateColor", "Winter Sky")
+                task.wait(0.5)
+                local target1 = CFrame.new(-5420.16602, 1084.9657, -2666.8208)
+                repeat
+                    topos(target1)
+                    task.wait(0.2)
+                until getgenv().StopTween == true or getgenv().AutoTouchPadHaki == false or
+                    (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - target1.Position).Magnitude <= 10
+                task.wait(0.5)                
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("activateColor", "Pure Red")
+                task.wait(0.5)
+                local target2 = CFrame.new(-5414.41357, 309.865753, -2212.45776)
+                repeat
+                    topos(target2)
+                    task.wait(0.2)
+                until getgenv().StopTween == true or getgenv().AutoTouchPadHaki == false or
+                    (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - target2.Position).Magnitude <= 10
+                task.wait(0.5)                
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("activateColor", "Snow White")
+                task.wait(0.5)
+                local target3 = CFrame.new(-4971.47559, 331.565765, -3720.02954)
+                repeat
+                    topos(target3)
+                    task.wait(0.2)
+                until getgenv().StopTween == true or getgenv().AutoTouchPadHaki == false or
+                    (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - target3.Position).Magnitude <= 10
+                task.wait(0.5)               
+                game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 600))
+                task.wait(1)
+                game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 600))
+            end
+        end)
+    end
+end)
+end 
+
+if World2 then
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Comprar Espada Lendaria",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoBuyLegendarySword = Value
+end)
+spawn(function()
+    local lastCallTime = 0
+    while task.wait(1) do
+        if getgenv().AutoBuyLegendarySword and World2 then
+            local currentTime = tick()            
+            if currentTime - lastCallTime >= 2 then
+                lastCallTime = currentTime                
+                pcall(function()
+                    local args1 = { "LegendarySwordDealer", "1" }
+                    local args2 = { "LegendarySwordDealer", "2" }
+                    local args3 = { "LegendarySwordDealer", "3" }                    
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args1))
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args2))
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args3))                    
+                end)
+            end
+        end
+    end
+end)
+end
+----- Quest ------
+
+
 
 
 -------Playerstab---
