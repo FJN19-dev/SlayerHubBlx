@@ -5850,26 +5850,12 @@ task.spawn(function()
     end
 end)
 
-local Toggle1 = Fruit:AddToggle({
-    Name = "Girar Fruta",
-    Description = "",
-    Default = false
-})
 
-Toggle1:Callback(function(Value)
-    getgenv().RandomAuto = Value
-end)
 
-task.spawn(function()
-    while true do
-        task.wait(2) -- DELAY OBRIGATÓRIO
-        if getgenv().RandomAuto then
-            pcall(function()
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
-            end)
-        end
-    end
-end)
+Fruit:AddButton({"Girar Fruta", function()
+  game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
+end})
+
 
 local Toggle1 = Fruit:AddToggle({
   Name = "Teleporta Para Fruta",
@@ -5893,6 +5879,39 @@ spawn(function()
         end
     end
 end)
+
+local Toggle1 = Fruit:AddToggle({
+    Name = "TP Fruta",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    getgenv().TPFruit = Value
+end)
+
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+local function TPToPosition(targetCFrame)
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local HRP = Character:WaitForChild("HumanoidRootPart")
+    HRP.CFrame = targetCFrame * CFrame.new(0, 3, 0)
+end
+
+task.spawn(function()
+    while task.wait(0.3) do
+        if getgenv().TPFruit then
+            for _, v in pairs(workspace:GetChildren()) do
+                if v:IsA("Tool") and v:FindFirstChild("Handle") and v.Name:find("Fruit") then
+                    TPToPosition(v.Handle.CFrame)
+                end
+            end
+        end
+    end
+end)
+
+
 
 ------shop --------
 local codes = {
