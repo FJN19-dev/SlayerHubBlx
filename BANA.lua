@@ -5035,12 +5035,10 @@ task.spawn(function()
 end)
 end
 
-
-
 if World3 then
 local Toggle1 = Quest:AddToggle({
   Name = "Auto Adaga Sombria",
-  Description = ",
+  Description = "",
   Default = false 
 })
 Toggle1:Callback(function(Value)
@@ -5083,6 +5081,125 @@ spawn(function()
     end)
 end)
 end
+if World3 then
+local Toggle1 = Quest:AddToggle({
+  Name = "Auto Valquíria",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoRipIndra = Value
+    StopTween(getgenv().AutoRipIndra) 
+end)
+spawn(function()
+    pcall(function()
+        while task.wait(1) do
+            if getgenv().AutoRipIndra and World3 then
+                local enemies = game:GetService("Workspace").Enemies
+                local player = game:GetService("Players").LocalPlayer                
+                if enemies:FindFirstChild("rip_indra True Form") or enemies:FindFirstChild("rip_indra") then
+                    for _, v in pairs(enemies:GetChildren()) do
+                        if (v.Name == "rip_indra True Form" or v.Name == "rip_indra") and v.Humanoid.Health > 0 and v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            repeat
+                                task.wait(0.3)
+                                pcall(function()
+                                    AutoHaki()
+                                    EquipWeapon(getgenv().SelectWeapon)
+                                    v.HumanoidRootPart.CanCollide = false
+                                    v.Humanoid.WalkSpeed = 0
+                                    topos(v.HumanoidRootPart.CFrame * Pos)
+                                end)
+                            until getgenv().AutoRipIndra == false or v.Humanoid.Health <= 0
+                        end
+                    end
+                elseif player.Backpack:FindFirstChild("God's Chalice") or player.Character:FindFirstChild("God's Chalice") then
+                    repeat
+                        task.wait(0.3)
+                        topos(CFrame.new(-5563.75048828125, 320.4276123046875, -2662.509521484375))
+                        EquipWeapon("God's Chalice")
+                    until not (player.Backpack:FindFirstChild("God's Chalice") or player.Character:FindFirstChild("God's Chalice"))
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form") then
+                    local ripIndraTrueForm = game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form")
+                    topos(ripIndraTrueForm.HumanoidRootPart.CFrame * Pos)
+                end
+            end
+        end
+    end)
+end)
+end 
+
+
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Tushita",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    getgenv().AutoTushita = Value
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if not getgenv().AutoTushita then return end
+
+            if workspace.Map.Turtle:FindFirstChild("TushitaGate") then
+                if not GetBP("Holy Torch") then
+                    topos(CFrame.new(5148.03613, 162.352493, 910.548218))
+                else
+                    EquipWeapon("Holy Torch")
+
+                    topos(CFrame.new(-10752, 417, -9366))
+                    topos(CFrame.new(-11672, 334, -9474))
+                    topos(CFrame.new(-12132, 521, -10655))
+                    topos(CFrame.new(-13336, 486, -6985))
+                    topos(CFrame.new(-13489, 332, -7925))
+                end
+            else
+                local enemy = GetConnectionEnemies("Longma")
+                if enemy and enemy:FindFirstChild("HumanoidRootPart") then
+                    topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                elseif replicated:FindFirstChild("Longma") then
+                    topos(replicated.Longma.HumanoidRootPart.CFrame * CFrame.new(0, 40, 0))
+                end
+            end
+        end)
+    end
+end)
+
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Cavendish Sword",
+    Description = "",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    getgenv().AutoCavendish = Value
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if getgenv().AutoCavendish then
+                local enemy = GetConnectionEnemies("Beautiful Pirate")
+
+                if enemy and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                    topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                else
+                    topos(CFrame.new(5283.609375, 22.56223487854, -110.78285217285))
+                end
+            end
+        end)
+    end
+end)
+end
+
+
+
+
 
 
 -------Playerstab---
@@ -5736,6 +5853,24 @@ task.spawn(function()
         end)
     end
 end)
+
+
+------- Fruit------
+local Fruit = Fruit:AddSection("Fruta")
+
+local Toggle1 = Fruit:AddToggle({
+  Name = "Girar Fruta",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    _G.RandomFruit = value
+    if _G.RandomFruit then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
+    end
+end)
+
+
 
 
 ------shop --------
