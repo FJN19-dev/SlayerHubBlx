@@ -1949,7 +1949,7 @@ function topos(Tween_Pos)
             and game:GetService("Players").LocalPlayer.Character.Humanoid.Health > 0 
             and game:GetService("Players").LocalPlayer.Character.HumanoidRootPart then
             if not TweenSpeed then
-                TweenSpeed = 350
+                TweenSpeed = 230
             end
             DefualtY = Tween_Pos.Y
             TargetY = Tween_Pos.Y
@@ -4930,6 +4930,42 @@ Toggle1:Callback(function(Value)
 end)
 end
 
+local Toggle1 = Sub:AddToggle({
+  Name = "Auto Coletar Berries",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+  _G.AutoBerry = Value 
+end)
+spawn(function()
+  while wait(0.1) do
+    if _G.AutoBerry then
+      local CollectionService= game:GetService("CollectionService")
+      local Players= game:GetService("Players")
+      local Player = Players.LocalPlayer
+      local BerryBush = CollectionService:GetTagged("BerryBush")      
+      local Distance, Nearest = math.huge      
+      for i = 1, #BerryBush do
+        local Bush = BerryBush[i]        
+        for AttributeName, BerryName in pairs(Bush:GetAttributes()) do
+          if not BerryArray or table.find(BerryArray, BerryName) then           
+            topos(Bush.Parent:GetPivot())
+            for i = 1, #BerryBush do
+            local Bush = BerryBush[i]        
+              for AttributeName, BerryName in pairs(Bush:GetChildren()) do
+                if not BerryArray or table.find(BerryArray, BerryName) then
+                  topos(BerryName.WorldPivot)
+                  fireproximityprompt(BerryName.ProximityPrompt,math.huge)
+                end
+              end
+            end      
+          end
+        end
+      end      
+    end
+  end
+end)
 ----- Quest ------
 local Section = Quest:AddSection({"Quests"})
 
