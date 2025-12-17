@@ -5865,12 +5865,17 @@ local Toggle1 = Fruit:AddToggle({
 })
 
 Toggle1:Callback(function(Value)
-    getgenv().RandomFruit = Value
-    if Value then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
-    end
+        _G.RandomAuto = Value
 end)
-
+spawn(function()
+    pcall(function()
+        while wait() do
+            if _G.RandomAuto then
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
+            end
+        end
+    end)
+end)
 
 
 
