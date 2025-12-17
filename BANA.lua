@@ -5858,26 +5858,6 @@ end)
 ------- Fruit------
 local Section = Fruit:AddSection({"Fruta"})
 
-local Toggle1 = Fruit:AddToggle({
-    Name = "Girar Fruta",
-    Description = "",
-    Default = false
-})
-
-Toggle1:Callback(function(Value)
-        _G.RandomAuto = Value
-end)
-spawn(function()
-    pcall(function()
-        while wait() do
-            if _G.RandomAuto then
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
-            end
-        end
-    end)
-end)
-
-
 
 ------shop --------
 local codes = {
