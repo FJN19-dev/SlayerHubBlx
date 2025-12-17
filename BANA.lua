@@ -5856,16 +5856,17 @@ end)
 
 
 ------- Fruit------
-local Fruit = Fruit:AddSection("Fruta")
+local Section = Fruit:AddSection({"Fruta"})
 
 local Toggle1 = Fruit:AddToggle({
-  Name = "Girar Fruta",
-  Description = "",
-  Default = false 
+    Name = "Girar Fruta",
+    Description = "",
+    Default = false
 })
+
 Toggle1:Callback(function(Value)
-    _G.RandomFruit = value
-    if _G.RandomFruit then
+    getgenv().RandomFruit = Value
+    if Value then
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Cousin", "Buy")
     end
 end)
