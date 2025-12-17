@@ -5880,36 +5880,44 @@ spawn(function()
     end
 end)
 
-local Toggle1 = Fruit:AddToggle({
-    Name = "TP Fruta",
-    Description = "",
-    Default = false
-})
-
-Toggle1:Callback(function(Value)
-    getgenv().TPFruit = Value
-end)
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
+local tpLoop = false
+
 local function TPToPosition(targetCFrame)
     local Character = Player.Character or Player.CharacterAdded:Wait()
     local HRP = Character:WaitForChild("HumanoidRootPart")
-    HRP.CFrame = targetCFrame * CFrame.new(0, 3, 0)
+
+    local offset = CFrame.new(0, 3, 0)
+    HRP.CFrame = targetCFrame * offset
 end
 
-task.spawn(function()
-    while task.wait(0.3) do
-        if getgenv().TPFruit then
-            for _, v in pairs(workspace:GetChildren()) do
-                if v:IsA("Tool") and v:FindFirstChild("Handle") and v.Name:find("Fruit") then
-                    TPToPosition(v.Handle.CFrame)
+local Toggle1 = Fruit:AddToggle({
+    Name = "TP Fruta",
+    Description = "Teleporta automaticamente para frutas",
+    Default = false
+})
+
+Toggle1:Callback(function(Value)
+    tpLoop = Value
+
+    if tpLoop then
+        task.spawn(function()
+            while tpLoop do
+                for _, v in pairs(workspace:GetChildren()) do
+                    if v:IsA("Tool") and v:FindFirstChild("Handle") and v.Name:find("Fruit") then
+                        TPToPosition(v.Handle.CFrame)
+                        task.wait(0.3)
+                    end
                 end
+                task.wait(0.1)
             end
-        end
+        end)
     end
 end)
+
 
 
 
