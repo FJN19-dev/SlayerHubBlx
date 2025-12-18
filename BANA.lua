@@ -5880,45 +5880,111 @@ spawn(function()
     end
 end)
 
-
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-
-local tpLoop = false
-
-local function TPToPosition(targetCFrame)
-    local Character = Player.Character or Player.CharacterAdded:Wait()
-    local HRP = Character:WaitForChild("HumanoidRootPart")
-
-    local offset = CFrame.new(0, 3, 0)
-    HRP.CFrame = targetCFrame * offset
-end
-
 local Toggle1 = Fruit:AddToggle({
-    Name = "TP Fruta",
-    Description = "Teleporta automaticamente para frutas",
-    Default = false
+    Name = "Guarda Fruta",
+    Description = "",
+    Default = false 
 })
 
-Toggle1:Callback(function(Value)
-    tpLoop = Value
+local AutoStoreTask
 
-    if tpLoop then
-        task.spawn(function()
-            while tpLoop do
-                for _, v in pairs(workspace:GetChildren()) do
-                    if v:IsA("Tool") and v:FindFirstChild("Handle") and v.Name:find("Fruit") then
-                        TPToPosition(v.Handle.CFrame)
-                        task.wait(0.3)
+Toggle1:Callback(function(Value)
+    print("Toggle changed:", Value)
+    getgenv().AutoStoreFruits = Value
+
+    if not Value then
+        return -- desligou o toggle, o loop para sozinho
+    end
+
+    local function Get_Fruit(Fruit)
+        local fruitTable = {
+            ["Rocket Fruit"] = "Rocket-Rocket",
+            ["Spin Fruit"] = "Spin-Spin",
+            ["Chop Fruit"] = "Chop-Chop",
+            ["Spring Fruit"] = "Spring-Spring",
+            ["Bomb Fruit"] = "Bomb-Bomb",
+            ["Smoke Fruit"] = "Smoke-Smoke",
+            ["Spike Fruit"] = "Spike-Spike",
+            ["Flame Fruit"] = "Flame-Flame",
+            ["Eagle Fruit"] = "Eagle-Eagle",
+            ["Ice Fruit"] = "Ice-Ice",
+            ["Sand Fruit"] = "Sand-Sand",
+            ["Dark Fruit"] = "Dark-Dark",
+            ["Ghost Fruit"] = "Ghost-Ghost",
+            ["Diamond Fruit"] = "Diamond-Diamond",
+            ["Light Fruit"] = "Light-Light",
+            ["Rubber Fruit"] = "Rubber-Rubber",
+            ["Barrier Fruit"] = "Barrier-Barrier",
+            ["Magma Fruit"] = "Magma-Magma",
+            ["Quake Fruit"] = "Quake-Quake",
+            ["Buddha Fruit"] = "Buddha-Buddha",
+            ["Love Fruit"] = "Love-Love",
+            ["Spider Fruit"] = "Spider-Spider",
+            ["Sound Fruit"] = "Sound-Sound",
+            ["Phoenix Fruit"] = "Phoenix-Phoenix",
+            ["Portal Fruit"] = "Portal-Portal",
+            ["Rumble Fruit"] = "Rumble-Rumble",
+            ["Pain Fruit"] = "Pain-Pain",
+            ["Blizzard Fruit"] = "Blizzard-Blizzard",
+            ["Gravity Fruit"] = "Gravity-Gravity",
+            ["Mammoth Fruit"] = "Mammoth-Mammoth",
+            ["Dough Fruit"] = "Dough-Dough",
+            ["Shadow Fruit"] = "Shadow-Shadow",
+            ["Venom Fruit"] = "Venom-Venom",
+            ["Control Fruit"] = "Control-Control",
+            ["Gas Fruit"] = "Gas-Gas",
+            ["Spirit Fruit"] = "Spirit-Spirit",
+            ["Leopard Fruit"] = "Leopard-Leopard",
+            ["Yeti Fruit"] = "Yeti-Yeti",
+            ["Kitsune Fruit"] = "Kitsune-Kitsune",
+            ["Dragon East Fruit"] = "Dragon-Dragon",
+            ["Dragon West Fruit"] = "Dragon-Dragon"
+        }
+        return fruitTable[Fruit]
+    end
+
+    if AutoStoreTask then return end
+
+    AutoStoreTask = task.spawn(function()
+        local Players = game:GetService("Players")
+        local Player = Players.LocalPlayer
+
+        while getgenv().AutoStoreFruits do
+            task.wait(1)
+
+            pcall(function()
+                if not Player.Character then return end
+
+                local plrBag = Player.Backpack
+                local plrChar = Player.Character
+
+                local function StoreIfNotStored(Fruit)
+                    if Fruit:IsA("Tool") and Fruit:FindFirstChild("Fruit") then
+                        local fruitName = Get_Fruit(Fruit.Name)
+                        if fruitName then
+                            local stored = game:GetService("ReplicatedStorage")
+                                .Remotes.CommF_:InvokeServer("CheckFruit", fruitName)
+
+                            if not stored then
+                                game:GetService("ReplicatedStorage")
+                                    .Remotes.CommF_:InvokeServer("StoreFruit", fruitName, Fruit)
+                            end
+                        end
                     end
                 end
-                task.wait(0.1)
-            end
-        end)
-    end
+
+                for _, Fruit in pairs(plrChar:GetChildren()) do
+                    StoreIfNotStored(Fruit)
+                end
+                for _, Fruit in pairs(plrBag:GetChildren()) do
+                    StoreIfNotStored(Fruit)
+                end
+            end)
+        end
+
+        AutoStoreTask = nil
+    end)
 end)
-
-
 
 
 ------shop --------
