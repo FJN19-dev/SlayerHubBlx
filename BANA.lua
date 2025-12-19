@@ -3782,6 +3782,7 @@ if World3 then
 end
 
 if World3 then 
+
 local Toggle1 = Sub:AddToggle({
     Name = "Auto Elite Hunter",
     Description = "",
@@ -3792,46 +3793,58 @@ Toggle1:Callback(function(Value)
     _G.AutoElite = Value
 
     if Value then
-        spawn(function()
+        task.spawn(function()
             while _G.AutoElite do
+                task.wait(0.2)
                 pcall(function()
-                    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
-                    local workspaceEnemies = game:GetService("Workspace").Enemies
-                    local replicatedStorage = game:GetService("ReplicatedStorage")
-                    
+
+                    local player = game.Players.LocalPlayer
+                    local playerGui = player.PlayerGui
+                    local Enemies = workspace.Enemies
+                    local RS = game.ReplicatedStorage
+                    local HRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    if not HRP then return end
+
+                    -- SE TIVER QUEST
                     if playerGui.Main.Quest.Visible then
                         local questTitle = playerGui.Main.Quest.Container.QuestTitle.Title.Text
-                        if string.find(questTitle, "Diablo") or string.find(questTitle, "Deandre") or string.find(questTitle, "Urban") then
-                            for _, v in pairs(workspaceEnemies:GetChildren()) do
-                                if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                                    if v.Name == "Diablo" or v.Name == "Deandre" or v.Name == "Urban" then
-                                        repeat wait(0)
-                                            EquipTool(SelectWeapon)
-                                            AutoHaki()
-                                            toTarget(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
-                                            MonsterPosition = v.HumanoidRootPart.CFrame
-                                            v.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame
-                                            v.Humanoid.JumpPower = 0
-                                            v.Humanoid.WalkSpeed = 0
-                                            v.HumanoidRootPart.CanCollide = false
-                                            v.HumanoidRootPart.Size = Vector3.new(1,1,1)
-                                        until not _G.AutoElite or v.Humanoid.Health <= 0 or not v.Parent
-                                    end
-                                end
-                            end
-                        else
-                            -- Se o inimigo não estiver no Workspace
-                            local targets = {"Diablo", "Deandre", "Urban"}
-                            for _, name in pairs(targets) do
-                                if workspaceEnemies:FindFirstChild(name) then
-                                    toTarget(workspaceEnemies[name].HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
-                                elseif replicatedStorage:FindFirstChild(name) then
-                                    toTarget(replicatedStorage[name].HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
+
+                        if string.find(questTitle, "Diablo")
+                        or string.find(questTitle, "Deandre")
+                        or string.find(questTitle, "Urban") then
+
+                            for _, mob in pairs(Enemies:GetChildren()) do
+                                if mob:FindFirstChild("Humanoid")
+                                and mob:FindFirstChild("HumanoidRootPart")
+                                and mob.Humanoid.Health > 0
+                                and (mob.Name == "Diablo" or mob.Name == "Deandre" or mob.Name == "Urban") then
+
+                                    repeat
+                                        task.wait(0.05)
+
+                                        EquipWeapon(getgenv().SelectWeapon)
+                                        AutoHaki()
+
+                                        -- VAI VOANDO ATÉ O ELITE
+                                        topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
+                                        -- TRAVA O MOB
+                                        mob.HumanoidRootPart.CanCollide = false
+                                        mob.HumanoidRootPart.Size = Vector3.new(5,5,5)
+                                        mob.Humanoid.WalkSpeed = 0
+                                        mob.Humanoid.JumpPower = 0
+                                        mob.Humanoid:ChangeState(11)
+
+                                    until not _G.AutoElite
+                                    or mob.Humanoid.Health <= 0
+                                    or not mob.Parent
                                 end
                             end
                         end
+
                     else
-                        replicatedStorage.Remotes.CommF_:InvokeServer("EliteHunter")
+                        -- NÃO TEM QUEST → PEGA QUEST
+                        RS.Remotes.CommF_:InvokeServer("EliteHunter")
                     end
                 end)
             end
