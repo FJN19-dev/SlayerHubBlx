@@ -3781,75 +3781,16 @@ if World3 then
     local Section = Sub:AddSection({"Elite Hunter"})
 end
 
-if World3 then 
-
+if World3 then
 local Toggle1 = Sub:AddToggle({
-    Name = "Auto Elite Hunter",
-    Description = "",
-    Default = false
+  Name = "Auto Elite Hunter",
+  Description = "",
+  Default = false 
 })
-
 Toggle1:Callback(function(Value)
-    _G.AutoElite = Value
-
-    if Value then
-        task.spawn(function()
-            while _G.AutoElite do
-                task.wait(0.2)
-                pcall(function()
-
-                    local player = game.Players.LocalPlayer
-                    local playerGui = player.PlayerGui
-                    local Enemies = workspace.Enemies
-                    local RS = game.ReplicatedStorage
-                    local HRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if not HRP then return end
-
-                    -- SE TIVER QUEST
-                    if playerGui.Main.Quest.Visible then
-                        local questTitle = playerGui.Main.Quest.Container.QuestTitle.Title.Text
-
-                        if string.find(questTitle, "Diablo")
-                        or string.find(questTitle, "Deandre")
-                        or string.find(questTitle, "Urban") then
-
-                            for _, mob in pairs(Enemies:GetChildren()) do
-                                if mob:FindFirstChild("Humanoid")
-                                and mob:FindFirstChild("HumanoidRootPart")
-                                and mob.Humanoid.Health > 0
-                                and (mob.Name == "Diablo" or mob.Name == "Deandre" or mob.Name == "Urban") then
-
-                                    repeat
-                                        task.wait(0.05)
-
-                                        EquipWeapon(getgenv().SelectWeapon)
-                                        AutoHaki()
-
-                                        -- VAI VOANDO ATÉ O ELITE
-                                        topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-
-                                        -- TRAVA O MOB
-                                        mob.HumanoidRootPart.CanCollide = false
-                                        mob.HumanoidRootPart.Size = Vector3.new(5,5,5)
-                                        mob.Humanoid.WalkSpeed = 0
-                                        mob.Humanoid.JumpPower = 0
-                                        mob.Humanoid:ChangeState(11)
-
-                                    until not _G.AutoElite
-                                    or mob.Humanoid.Health <= 0
-                                    or not mob.Parent
-                                end
-                            end
-                        end
-
-                    else
-                        -- NÃO TEM QUEST → PEGA QUEST
-                        RS.Remotes.CommF_:InvokeServer("EliteHunter")
-                    end
-                end)
-            end
-        end)
-    end
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+    getgenv().AutoEliteHunter = Value
+    StopTween(getgenv().AutoEliteHunter) 
 end)
 end
 
@@ -5211,6 +5152,70 @@ end)
 end
 
 
+-------------------------------------------------
+-- TOGGLE
+-------------------------------------------------
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Pole V1",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.AutoBoss = Value
+end)
+
+-------------------------------------------------
+-- FUNÇÃO: PEGAR SPAWN DO THUNDER GOD
+-------------------------------------------------
+local function GetThunderGodSpawn()
+    for _, v in pairs(workspace._WorldOrigin.EnemySpawns:GetChildren()) do
+        if v.Name == "Thunder God [Lv. 575] [Boss]" then
+            return v
+        end
+    end
+end
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    while task.wait(0.1) do
+        if _G.AutoBoss then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local spawnPoint = GetThunderGodSpawn()
+                if not spawnPoint then return end
+
+                -- Vai e fica acima do SPAWN
+                topos(spawnPoint.CFrame * CFrame.new(0, 20, 0))
+
+                -- Se o boss já spawnou, sobe nele
+                for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                    if mob.Name == "Thunder God [Lv. 575] [Boss]"
+                    and mob:FindFirstChild("HumanoidRootPart")
+                    and mob:FindFirstChild("Humanoid")
+                    and mob.Humanoid.Health > 0 then
+
+                        topos(mob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
+                        if getgenv().SelectWeapon then
+                            EquipWeapon(getgenv().SelectWeapon)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+
+
 _G.AutoFishing = false
 _G.SelectedBait = "Basic Bait"
 _G.SelectedRod = "Fishing Rod"
@@ -5357,7 +5362,7 @@ elseif Sea2 then
     }
 elseif Sea3 then
     IslandList = {
-        "Mansão", "Cidade Do Porto", "Grande Árvore", "Castelo Do Mar",
+        "Mansão", "Cidade Do Porto","Dragon Dojo","Grande Árvore", "Castelo Do Mar",
         "MiniSky", "Ilha da Hydra", "Ilha da Tartaruga", "Castelo Assombrado",
         "Ilha do Sorvete", "Ilha do Amendoim", "Ilha do Bolo", "Ilha do Cacau",
         "Ilha do Doce", "Tiki Outpost",
@@ -5369,7 +5374,7 @@ local Dropdown = Teleport:AddDropdown({
   Name = "Teleporte Island",
   Description = "Select an island to teleport",
   Options = IslandList,
-  Default = "1",
+  Default = "",
   Flag = "Teleport",
   Callback = function(Value)
     _G.SelectedIsland = Value
@@ -5494,6 +5499,8 @@ Teleport:AddButton({"Teleporta Island", function()
             TeleportToPosition(CFrame.new(-1014.4241943359375, 149.11068725585938, -14555.962890625))
         elseif _G.SelectedIsland == "Tiki Outpost" then
             TeleportToPosition(CFrame.new(-16542.447265625, 55.68632888793945, 1044.41650390625))
+        elseif _G.SelectedIsland == "Dragon Dojo" then
+            TeleportToPosition(CFrame.new(5686.61377, 1206.85498, 899.379883, -0.256126314, -2.43622562e-08, -0.966643333, 2.83967623e-08, 1, -3.27270797e-08, 0.966643333, -3.58318069e-08, -0.256126314))
         end
 end})
 
