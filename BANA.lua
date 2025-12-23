@@ -177,7 +177,7 @@ if placeId == 2753915549 then
     First_Sea = true
 elseif placeId == 4442272183 then
     Second_Sea = true
-elseif placeId == 7449423635 then
+elseif placeId == 100117331123089 then
     Third_Sea = true
 end
 
@@ -205,7 +205,7 @@ if placeId == 2753915549 then
     World1 = true
 elseif placeId == 4442272183 then
     World2 = true
-elseif placeId == 7449423635 then
+elseif placeId == 100117331123089 then
     World3 = true
 end
 
