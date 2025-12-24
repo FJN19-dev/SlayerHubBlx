@@ -4814,6 +4814,48 @@ end
 
 if World3 then
 local Toggle1 = Quest:AddToggle({
+  Name = "Auto Coleta Yama",
+  Description = "",
+  Default = false 
+})
+Toggle1:Callback(function(Value)
+    getgenv().AutoYama = Value
+end)
+spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            if getgenv().AutoYama then
+                local progress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
+                if progress and progress >= 30 then
+                    local player = game:GetService("Players").LocalPlayer
+                    local yamaInBackpack = player.Backpack:FindFirstChild("Yama")
+                    local sealedKatana = game:GetService("Workspace").Map:FindFirstChild("Waterfall")                    
+                    if not yamaInBackpack and sealedKatana and sealedKatana:FindFirstChild("SealedKatana") then
+                        local clickDetector = sealedKatana.SealedKatana.Handle:FindFirstChild("ClickDetector")
+                        if clickDetector then
+                            repeat
+                                task.wait(0.5)
+                                fireclickdetector(clickDetector)
+                            until player.Backpack:FindFirstChild("Yama") or not getgenv().AutoYama
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+end
+
+local plr = game.Players.LocalPlayer
+
+function GetBP(v)
+    return plr.Backpack:FindFirstChild(v)
+        or plr.Character:FindFirstChild(v)
+end
+
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
     Name = "Auto Tushita",
     Description = "",
     Default = false
