@@ -175,7 +175,7 @@ local Third_Sea = false
 
 if placeId == 2753915549 then
     First_Sea = true
-elseif placeId == 4442272183 then
+elseif placeId == 79091703265657 then
     Second_Sea = true
 elseif placeId == 100117331123089 then
     Third_Sea = true
@@ -203,7 +203,7 @@ local World1, World2, World3 = false, false, false
 
 if placeId == 2753915549 then
     World1 = true
-elseif placeId == 4442272183 then
+elseif placeId == 79091703265657 then
     World2 = true
 elseif placeId == 100117331123089 then
     World3 = true
@@ -889,7 +889,7 @@ function CheckQuest()
 end
 
 local id = game.PlaceId
-if id == 2753915549 then World1 = true; elseif id == 4442272183 then World2 = true; elseif id == 7449423635 then World3 = true; else game:Shutdown() end;
+if id == 2753915549 then World1 = true; elseif id == 79091703265657 then World2 = true; elseif id == 100117331123089 then World3 = true; else game:Shutdown() end;
 
 
 First_Sea = false
@@ -898,9 +898,9 @@ Third_Sea = false
 local placeId = game.PlaceId
 if placeId == 2753915549 then
 First_Sea = true
-elseif placeId == 4442272183 then
+elseif placeId == 79091703265657 then
 Second_Sea = true
-elseif placeId == 7449423635 then
+elseif placeId == 100117331123089 then
 Third_Sea = true
 end
 
@@ -1673,9 +1673,9 @@ function CheckNearestTeleporter(aI)
     local World1, World2, World3
     if y == 2753915549 then
         World1 = true
-    elseif y == 4442272183 then
+    elseif y == 79091703265657 then
         World2 = true
-    elseif y == 7449423635 then
+    elseif y == 100117331123089  then
         World3 = true
     end
     local TableLocations = {}
@@ -2919,7 +2919,7 @@ elseif World2 then
     }
 elseif World3 then
     tableBoss = {
-        "Stone", "Island Empress", "Kilo Admiral", "Captain Elephant", 
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", 
         "Beautiful Pirate", "rip_indra True Form", "Longma", "Soul Reaper", 
         "Cake Queen", "Cake Prince", "Dough King"
     }
@@ -4717,6 +4717,7 @@ local Section = Quest:AddSection({"Quests"})
 
 local Section = Quest:AddSection({"Itens"})
 
+------Sea3------
 
 if World3 then
 local Toggle1 = Quest:AddToggle({
@@ -4854,32 +4855,373 @@ end
 
 if World3 then
 local Toggle1 = Quest:AddToggle({
-    Name = "Auto Cavendish Sword",
+    Name = "Auto Espada Companheira",
     Description = "",
-    Default = false
+    Default = false 
 })
 
 Toggle1:Callback(function(Value)
-    getgenv().AutoCavendish = Value
+    _G.EspadaCompanheira = Value
 end)
 
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            if getgenv().AutoCavendish then
-                local enemy = GetConnectionEnemies("Beautiful Pirate")
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(-678.648804, 381.353943, -11114.2012, -0.908641815, 0.00149294338, 0.41757378, 0.00837114919, 0.999857843, 0.0146408929, -0.417492568, 0.0167988986, -0.90852499)
 
-                if enemy and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                    topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                else
-                    topos(CFrame.new(5283.609375, 22.56223487854, -110.78285217285))
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.EspadaCompanheira then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Cake Queen")
                 end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.EspadaCompanheira
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.EspadaCompanheira
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
             end
-        end)
+        end
     end
 end)
 end
 
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Cavender",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.Cavender = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(5283.609375, 22.56223487854, -110.78285217285)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.Cavender then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Beautiful Pirate")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.Cavender
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.Cavender
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
+end
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Ganchos Duplos",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.GanchosDuplos = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(-13376.7578125, 433.28689575195, -8071.392578125)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.GanchosDuplos then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Captain Elephant")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.GanchosDuplos
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.GanchosDuplos
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
+end
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Lei",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.Lei = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(2764.2233886719, 432.46154785156, -7144.4580078125)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.Lei then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Kilo Admiral")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.Lei
+
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.Lei
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
+end
+
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Serpent Crow",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.SerpentCrow = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(5543.86328125, 668.97399902344, 199.0341796875)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.SerpentCrow then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Hydra Leader")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.SerpentCrow
+
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.SerpentCrow
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
+end
+
+if World3 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Capacete Do Piloto",
+    Description = "",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.CapacetedoPiloto = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(-1027.6512451172, 92.404174804688, 6578.8530273438)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.CapacetedoPiloto then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Stone")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.CapacetedoPiloto
+
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.CapacetedoPiloto
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
+end
 ------Sea2
 
 if World2 then
@@ -5018,6 +5360,68 @@ if World2 then
             end
         end)
     end)
+end
+
+if World2 then
+local Toggle1 = Quest:AddToggle({
+    Name = "Auto Regonku",
+    Description = "Ele Não coloca a Chave No bau",
+    Default = false 
+})
+
+Toggle1:Callback(function(Value)
+    _G.Rengoku = Value
+end)
+
+-- CFrame fixo antes de atacar o boss
+local CFrameBoss = CFrame.new(6403.5439453125, 340.29766845703, -6894.5595703125)
+
+-------------------------------------------------
+-- LOOP PRINCIPAL
+-------------------------------------------------
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while task.wait(0.1) do
+        if _G.Rengoku then
+            -- Teleporta sempre para o CFrame inicial, mesmo sem boss
+            pcall(function()
+                topos(CFrameBoss)
+            end)
+
+            -- Espera o boss spawnar
+            local boss = nil
+            repeat
+                task.wait(0.2)
+                local enemies = workspace:FindFirstChild("Enemies")
+                if enemies then
+                    boss = enemies:FindFirstChild("Awakened Ice Admiral")
+                end
+            until (boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0) or not _G.Rengoku
+
+            -- Se o boss existe, entra no loop de ataque
+            if boss then
+                repeat
+                    task.wait(0.05)
+
+                    if getgenv().SelectWeapon then
+                        pcall(function() EquipWeapon(getgenv().SelectWeapon) end)
+                    end
+
+                    pcall(function()
+                        -- Sempre 20 studs acima do boss
+                        topos(boss.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end)
+
+                until not _G.Rengoku
+                or boss.Humanoid.Health <= 0
+                or not boss.Parent
+            end
+        end
+    end
+end)
 end
 
 
@@ -6220,12 +6624,12 @@ end)
 local Sea1, Sea2, Sea3 = false, false, false
 if game.PlaceId == 2753915549 then
     Sea1 = true
-elseif game.PlaceId == 4442272183 then
+elseif game.PlaceId == 79091703265657 then
     Sea2 = true
-elseif game.PlaceId == 7449423635 then
+elseif game.PlaceId == 100117331123089 then
     Sea3 = true
 else
-    game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
+
 end
 
 local Section = Teleport:AddSection({"Move"})
@@ -6968,17 +7372,6 @@ Shop:AddButton({
     end
 })
 
--- Verificar qual Sea o jogador está
-local Sea1, Sea2, Sea3 = false, false, false
-if game.PlaceId == 2753915549 then
-    Sea1 = true
-elseif game.PlaceId == 4442272183 then
-    Sea2 = true
-elseif game.PlaceId == 7449423635 then
-    Sea3 = true
-else
-    game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
-end
 
 local Estilo = Shop:AddSection({"Estilos De Lutas"})
 
@@ -8260,3 +8653,37 @@ Toggle1:Callback(function(t)
     end)
 end)
 
+--\\ ♡VIP♡
+----------------------------------------------------------------------------------------------------
+print("--[[Hop Server If You Meet Game Admin]]--")
+local targetPlayers = {
+    ["red_game43"] = true,
+    ["rip_indra"] = true,
+    ["Axiore"] = true,
+    ["Polkster"] = true,
+    ["wenlocktoad"] = true,
+    ["Daigrock"] = true,
+    ["toilamvidamme"] = true,
+    ["oofficialnoobie"] = true,
+    ["Uzoth"] = true,
+    ["Azarth"] = true,
+    ["arlthmetic"] = true,
+    ["Death_King"] = true,
+    ["Lunoven"] = true,
+    ["TheGreateAced"] = true,
+    ["rip_fud"] = true,
+    ["drip_mama"] = true,
+    ["layandikit12"] = true,
+    ["Hingoi"] = true
+}
+spawn(function()
+    while true do
+        wait(1)
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if targetPlayers[v.Name] then
+                Hop()
+                break
+            end
+        end
+    end
+end)
