@@ -4126,10 +4126,9 @@ local Toggle1 = Sub:AddToggle({
 })
 
 Toggle1:Callback(function(Value)
-    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(
-        "CakePrinceSpawner",
-        Value
-    )
+    if Value then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner", true)
+    end
 end)
 end
 
