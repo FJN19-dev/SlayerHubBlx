@@ -897,18 +897,32 @@ if getgenv().AutoFarm then
     local RF = Net:WaitForChild("RF/SubmarineWorkerSpeak")
     local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
-    local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRoot = character:WaitForChild("HumanoidRootPart")
+
+    -- CFrame do NPC
+    local npcCFrame = CFrame.new(
+        -16267.7178, 25.223526, 1372.2135,
+        0.473281175, -7.09690227e-08, 0.88091141,
+        -1.6041092e-08, 1, 8.91814622e-08,
+        -0.88091141, -5.63386884e-08, 0.473281175
+    )
+
+    -- Move o player até o NPC
+    topos(npcCFrame)
+    task.wait(0.5) -- espera 0.5s para garantir que chegou
 
     -- Checa se o jogador NÃO está na Submerged Island
-    if playerPos.Y < -1500 then -- exemplo, Submerged Island fica abaixo de Y -1500
+    if humanoidRoot.Position.Y < -1500 then -- ajuste conforme a altura real da ilha
         RF:InvokeServer("TravelToSubmergedIsland")
         task.wait(0.5)
         CommF:InvokeServer("SetLastSpawnPoint", "SubmergedIsland")
         task.wait(1)
-          end
-        end
-      end
     end
+end
+end
+end
 end
 
 local id = game.PlaceId
